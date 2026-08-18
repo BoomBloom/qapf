@@ -1,7 +1,8 @@
 # QAPF — Quantitative Autonomous Prop Firm
 
 ## What this is
-A local-first autonomous quant trading platform: a 12-agent AI workforce covering research, statistics,
+A local-first autonomous quant trading platform: a prop-firm-style AI workforce (16 agents as of
+2026-08-18, not capped at a round number) covering research, statistics,
 strategy building, backtesting, risk enforcement, portfolio allocation, execution, and operations —
 built on top of two forked upstreams (TradingAgents for orchestration/LLM judgment, Qlib for
 data/backtest/execution math) plus custom agents for what neither provides. Full rationale, the
@@ -37,7 +38,13 @@ backend/agents/alpha/     BUILT & verified live (2026-08-18) — pandas factor c
                           5d reversal, low-vol, volume trend), cross-sectional rank normalization to
                           [-1,+1], regime-conditional weighting that CONSUMES Agent 6's output (Agent 7).
                           Deliberately avoids Qlib's broken expression engine. Run: `python -m agents.alpha`.
-backend/agents/           other 8 agents not yet built — see README's Agent Roster table
+backend/agents/backtest/  BUILT & verified live (2026-08-18) — walk-forward backtest chaining Agent 6 ->
+                          Agent 7 -> Qlib's verified backtest engine -> Agent 4's DSR (Agent 9). Runs
+                          2018-2020 (spans COVID) on Qlib's own bundled price data for execution, NOT
+                          live yfinance -- see backtest/walkforward.py's module docstring for why.
+                          Run: `python -m agents.backtest`.
+backend/agents/           other 11 agents not yet built (incl. Agents 13-16, added 2026-08-18 to cover
+                          compliance, model risk, data reliability, and treasury) — see README's roster
 backend/risk/             (not yet built) isolated CRO — see Ground Rules below, non-negotiable isolation
 .claude/references/       On-demand detail, e.g. qlib-known-issues.md. Add new ones here as they recur.
 .venv/                    Python 3.12 (NOT system Python, which is 3.14 — see qlib-known-issues.md)
@@ -112,6 +119,8 @@ the target layout — build into it, don't invent a different one.
   key needed — uses FRED's keyless CSV endpoint, not the keyed JSON API).
 - Run the alpha agent manually: `cd backend && python -m agents.alpha` (pulls the live regime from
   Agent 6, then runs bounds / factor-direction / look-ahead / regime-sensitivity checks).
+- Run the backtest agent manually: `cd backend && python -m agents.backtest` (walk-forward backtest,
+  2018-2020, ~30-60s; needs `qlib.init()` against the bundled US dataset, already downloaded).
 - No test suite or lint config exists yet. Add real commands here the moment they do — don't leave this
   section aspirational.
 

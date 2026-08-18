@@ -98,23 +98,71 @@ def _snapshot(alias: str, series: pd.Series) -> MacroSeriesSnapshot:
 class MacroRegimeClassifier:
     """Ingests macro series from FRED and classifies the growth x inflation regime."""
 
+    ALIASES = [
+        "industrial_production",
+        "nonfarm_payrolls",
+        "unemployment_rate",
+        "cpi",
+        "core_cpi",
+        "yield_curve",
+        "vix",
+    ]
+
     def __init__(self, client: FredClient | None = None):
         self.client = client or FredClient()
 
-    def assess(self, start_date: str = "2015-01-01") -> MacroRegimeAssessment:
-        aliases = [
-            "industrial_production",
-            "nonfarm_payrolls",
-            "unemployment_rate",
-            "cpi",
-            "core_cpi",
-            "yield_curve",
-            "vix",
-        ]
+    def fetch_all_series(self, start_date: str = "2015-01-01") -> dict[str, pd.Series]:
+        """Fetch every series this classifier needs, once, in full.
+
+        Meant to be called once and passed as `series_cache` to many `assess()`
+        calls (e.g. one per rebalance date in a walk-forward backtest) — avoids
+        re-fetching the same multi-year series from FRED on every call, since
+        `assess()` only ever needs to *slice* it differently per `as_of`.
+        """
         series_map: dict[str, pd.Series] = {}
-        for alias in aliases:
+        for alias in self.ALIASES:
             try:
                 series_map[alias] = self.client.fetch_series(alias, start_date=start_date)
+            except Exception as e:
+                logger.warning("Could not fetch %s: %s", alias, e)
+        return series_map
+
+    def assess(
+        self,
+        start_date: str = "2015-01-01",
+        as_of: str | pd.Timestamp | None = None,
+        series_cache: dict[str, pd.Series] | None = None,
+    ) -> MacroRegimeAssessment:
+        """Classify the macro regime using data available at `as_of`.
+
+        `as_of=None` means "now" (unrestricted). Passing a historical date is
+        what makes this safe for a walk-forward backtest: without it, every
+        historical rebalance would silently use TODAY's regime to trade THAT
+        DATE, which is look-ahead bias baked into the tool itself rather than a
+        modeling choice — the same failure mode this project has already found
+        and fixed twice (the CPI shift(12) bug, Agent 7's lookahead test).
+
+        `series_cache`: pass the result of `fetch_all_series()` to slice
+        already-fetched series instead of hitting FRED again. Each `assess()`
+        call still only sees data at or before `as_of` either way — the cache
+        changes how the data arrives, not what's visible to the classifier.
+        """
+        as_of_ts = pd.Timestamp(as_of) if as_of is not None else None
+
+        series_map: dict[str, pd.Series] = {}
+        for alias in self.ALIASES:
+            try:
+                if series_cache is not None:
+                    if alias not in series_cache:
+                        raise ValueError(f"'{alias}' not present in series_cache.")
+                    series = series_cache[alias]
+                else:
+                    series = self.client.fetch_series(alias, start_date=start_date)
+                if as_of_ts is not None:
+                    series = series.loc[series.index <= as_of_ts]
+                    if series.empty:
+                        raise ValueError(f"No {alias} observations at or before {as_of_ts.date()}.")
+                series_map[alias] = series
             except Exception as e:
                 # A single unavailable series shouldn't void the whole assessment;
                 # the scores below average over whatever inputs did arrive, and
@@ -214,7 +262,7 @@ class MacroRegimeClassifier:
             risk_regime = RiskRegime.NEUTRAL
 
         return MacroRegimeAssessment(
-            as_of=str(date.today()),
+            as_of=str(as_of_ts.date()) if as_of_ts is not None else str(date.today()),
             regime=regime,
             growth_direction=growth_direction,
             inflation_direction=inflation_direction,

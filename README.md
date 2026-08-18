@@ -1,10 +1,13 @@
 # Quantitative Autonomous Prop Firm (QAPF)
 
 ## Mission
-A local-first, autonomous quant trading platform where a 12-agent AI workforce
-covers the full lifecycle of a prop trading firm — research, statistics,
-strategy building, backtesting, risk enforcement, portfolio allocation,
-execution, and operations.
+A local-first, autonomous quant trading platform where an AI workforce covers
+the full lifecycle of a prop trading firm — research, statistics, strategy
+building, backtesting, risk enforcement, portfolio allocation, execution, and
+operations. The org chart is modeled on a real prop firm's, not capped at a
+round number: **16 agents** as of 2026-08-18 (started at 12; four more were
+added because a real prop firm has functions the original 12 didn't cover —
+see "Agents 13-16" below).
 
 ---
 
@@ -118,9 +121,31 @@ multiprocessing (directly or via Qlib internals) must guard its entry point with
 | 10 | Chief Risk Officer (CRO) | **Build custom, isolated** | Must be deterministic code with kill-switch authority, running **outside** any LLM path. TradingAgents' aggressive/conservative/neutral debators are advisory LLM opinion — they must never substitute for hard VaR/drawdown enforcement |
 | 11 | Execution & Microstructure | **Adapt Qlib** | `exchange.py` / `executor.py` give order-simulation primitives; Qlib also has `examples/rl_order_execution` and `examples/orderbook_data`. Extend toward live APIs later |
 | 12 | Operations & Settlement | **Extend Qlib** | `qlib/workflow/recorder.py` (MLflow-backed) is a head start for audit logging, PnL history, and experiment tracking |
+| 13 | Compliance & Regulatory Surveillance | **Build custom** | Absent from both repos. Wash-trading/spoofing pattern detection, position-limit checks, restricted-list screening, and a regulatory-defensible audit trail. Structurally distinct from the CRO (Agent 10): CRO watches capital-at-risk, this watches conduct |
+| 14 | Model Risk & Independent Validation | **Build custom, independent of Agent 9** | Absent from both repos. A real institution keeps this separate from the team that built the model, on purpose — the question isn't "does the backtest look good" (Agent 9's job) but "could this model be systematically wrong in ways backtesting can't reveal": regime-shift blindness, decay over time, out-of-distribution inputs |
+| 15 | Data Infrastructure & Reliability | **Build custom** | Absent from both repos. Watches every upstream feed (FRED, yfinance, arXiv, GitHub, and Qlib's own data store) for staleness, schema drift, and outages. Motivated by this project's own history, not speculation — see "Why Agent 15 exists" below |
+| 16 | Treasury & Funding | **Build custom** (defer) | Absent from both repos. Margin, collateral, funding costs, and currency hedging of firm capital — distinct from the Portfolio Manager, which allocates strategy capital, not manages the cash/broker relationship. Lower priority for a single-operator system without multiple prime broker relationships; named so it isn't silently forgotten |
 
-**Net:** 4 adapt, 3 extend, 5 build custom. Roughly half the system has a real
-foundation already — considerably better than starting cold.
+**Net:** 4 adapt, 3 extend, 9 build custom (2 explicitly deferred: Agent 5,
+Agent 16). Roughly half the system has a real foundation already —
+considerably better than starting cold.
+
+### Why Agent 15 (Data Infrastructure & Reliability) exists
+
+This isn't a speculative role — it's a direct response to this project's own
+track record. Every one of these was found only because a human-triggered live
+test happened to catch it, not because anything was watching for it:
+
+- PyGithub's `PaginatedList` throwing `IndexError` on a short result set (Agent 3).
+- FRED's `CPIAUCSL` silently missing an observation, corrupting a YoY calc (Agent 6).
+- Qlib's public sample dataset calendar being stale since 2020-11-10.
+- Qlib's expression engine (`Ref`/`Mean`/`Std`) silently returning empty data
+  under the current numpy/pandas stack.
+
+A dedicated agent whose only job is "watch every upstream data source for
+drift, gaps, and staleness, and say so before it corrupts a downstream
+calculation" would have flagged several of these automatically. Not yet built —
+named here so the gap is explicit rather than rediscovered a fifth time.
 
 ---
 
@@ -267,7 +292,59 @@ head start from the TradingAgents fork.)
   verified — and a fake sentiment score is worse than a missing one.
 
 ### Phase 3 — Validation & risk
-- Extend Qlib's backtest with Monte Carlo, walk-forward, and bias checks.
+
+**Agent 9 (Backtesting & Strategy Validation) is built and verified live** as
+of 2026-08-18: `backend/agents/backtest/`. Run with `cd backend && python -m agents.backtest`.
+**This is the first fully composed pipeline** — Agent 6 (regime) → Agent 7
+(signal) → Qlib's backtest engine → Agent 4 (Deflated Sharpe Ratio), with every
+rebalance using only data available as of that date.
+
+- **A real gap had to be fixed first.** Agent 6 always fetched "as of now" —
+  fine for live use, but a walk-forward backtest asks "what was the regime on
+  this past date," and using today's regime to trade a historical date would
+  be look-ahead bias baked into the tool itself. `MacroRegimeClassifier.assess()`
+  now takes an `as_of` parameter (plus an optional pre-fetched `series_cache`
+  so a 35-rebalance backtest doesn't make ~250 redundant live FRED calls) —
+  verified against real historical dates: 2018-06 correctly reads
+  inflationary expansion, 2019-06 disinflationary growth, 2020-06 deflationary
+  contraction with the growth score pinned at its -1.0 floor during the COVID
+  crash. That last one in particular is a strong real-world sanity check, not
+  a designed-for-the-demo result.
+- **Runs on a 2018-2020 window, not "through today" — for a specific, verified
+  reason, not a shortcut.** Qlib's execution engine needs its own bundled
+  price data (mixing in fresh yfinance prices for the same tickers via
+  `Exchange(extra_quote=...)` risks duplicate-index conflicts in its internal
+  quote store — investigated, not assumed). That dataset's calendar stops at
+  2020-11-10. All 15 universe tickers were verified to have complete,
+  gap-free coverage in it from 2017-01-03 onward, so the window was chosen
+  to end there — and it happens to span the COVID crash, a genuinely useful
+  stress period rather than a limitation to apologize for. Agent 6/7's
+  signal generation uses real historical yfinance data for the same window;
+  Qlib's own bundled data (also Yahoo-sourced) handles execution pricing —
+  two real data sources for the same real market, not a mock standing in
+  for one.
+- **Composition-level look-ahead test, not just per-agent.** Agent 6 and 7
+  were already individually verified point-in-time-safe, but the new glue
+  code here (rebalance-date selection, forward-filling a signal between
+  rebalances) could reintroduce the bug on its own. Corrupting all data after
+  the backtest's midpoint left all 18 earlier rebalances' long/short lists
+  byte-identical — verified, not assumed from the sub-agents' own tests.
+- **The honest result:** over 2018-01-02 to 2020-10-30, the strategy returned
+  **+27.54%** against a naive equal-weight buy-and-hold benchmark's **+50.98%**
+  — it underperformed. Annualized Sharpe 0.495, max drawdown -36.68% (the
+  COVID crash). Feeding the daily returns through Agent 4's Deflated Sharpe
+  Ratio (assuming 4 trials, for Agent 7's 4 hand-set factors) gives **0.414 —
+  not statistically significant.** This is the system working correctly, not
+  failing: Agent 9's job is to give a trustworthy skeptical answer, not a
+  flattering one, and a hand-set factor design underperforming a naive
+  benchmark on its first real test is a normal, expected outcome, not a bug
+  to chase. The regime classifier and signal engine are validated; the
+  specific factor weights are not (yet) shown to add value.
+- Deliberately deferred, not built: Monte Carlo simulation and parameter
+  sensitivity sweeps (both named in the original spec). The walk-forward
+  mechanics and the overfitting check (DSR) were the higher-priority half to
+  get right first.
+
 - Wire CRO's real-time VaR/CVaR/drawdown against backtest then paper-trade output.
 - Dashboard: equity curves, drawdown, Monte Carlo distributions, risk gauges.
 

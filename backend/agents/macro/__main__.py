@@ -65,6 +65,29 @@ def main():
             f"({from_scalar:.2f}%) despite the missing 2025-10-01 observation."
         )
 
+    # Point-in-time regression check: as_of=<today> must exactly match live
+    # (as_of=None), and a historical as_of must never surface data past that
+    # cutoff. Needed for Agent 9's walk-forward backtest, which asks "what was
+    # the regime on this past date" for every rebalance -- if this silently
+    # used today's regime for historical dates, every backtest result built on
+    # top of it would be look-ahead-biased.
+    import datetime as _dt
+
+    as_of_today = MacroRegimeClassifier().assess(as_of=str(_dt.date.today()))
+    assert as_of_today.regime == assessment.regime and abs(
+        as_of_today.growth_score - assessment.growth_score
+    ) < 1e-9, "assess(as_of=today) disagrees with assess() (live) — point-in-time path is broken"
+
+    past = MacroRegimeClassifier().assess(as_of="2025-08-18")
+    assert all(s.latest_date <= "2025-08-18" for s in past.inputs), (
+        "assess(as_of=...) leaked data past the cutoff — a walk-forward backtest "
+        "built on this would be look-ahead-biased"
+    )
+    print(
+        "Point-in-time check passed: as_of=today matches live, and a historical "
+        "as_of surfaces no data past its cutoff."
+    )
+
     print("\n=== Company fundamentals (live yfinance) ===\n")
     ingestor = FundamentalsIngestor()
     for ticker in ["AAPL", "KO"]:
