@@ -68,3 +68,33 @@ same class of error this project keeps hitting: a failure that indicts the wrong
       frequency — including "no" if the honest answer is no.
 - [ ] Any surprises about how the graph actually behaves (vs. how its source reads) are noted, the same
       way Qlib's real behaviour was recorded in `.claude/references/qlib-known-issues.md`.
+
+
+## DEFINITIVE FINDING (2026-08-19): free tiers cannot run this graph
+
+Four provider keys were supplied and all four authenticate. **Every one has a hard structural blocker on
+its free tier**, so this is not a credentials problem and no additional key will resolve it:
+
+| Provider | Free-tier limit | Consequence |
+|---|---|---|
+| Groq | 8,000 tokens/minute | A single Market Analyst call needs 8,179 tokens -> `413`. Cannot fit even one call. |
+| Gemini Flash | **20 requests per day** (`GenerateRequestsPerDayPerProjectPerModel-FreeTier`) | The graph needs far more than 20 LLM calls for one decision. Cannot fit one run. |
+| NVIDIA NIM | cold-start latency | Inference timed out past 2 minutes. |
+| OpenAI | no credits on the account | `429 insufficient_quota`. |
+
+### Why this matters beyond this ticket
+
+This is a product finding, not just a blocked task: **the multi-agent LLM architecture has a hard cost
+floor.** A debate graph that runs several analysts, a bull/bear exchange, a research manager, a trader,
+three risk debators and a portfolio manager makes dozens of LLM calls per decision. That is
+fundamentally incompatible with free tiers, and it directly sharpens the per-decision-cost scope risk
+`README.md` has flagged since the start.
+
+**Decision required from the user** (a spending decision, not a technical one): fund one provider before
+Agents 1 and 8 can be built or this ticket closed. Cheapest path is likely Groq's Dev tier — its blocker
+is a fixed quota rather than variable load, so a paid tier removes it deterministically.
+
+### What this does NOT block
+
+Everything non-LLM. Agents 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15 need no LLM at all. Only Agent 8
+(code generation) and Agent 1 (which forks TradingAgents' LLM graph) genuinely require this.
