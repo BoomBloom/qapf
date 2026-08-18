@@ -1,0 +1,22 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Node (skills CLI)
+node_modules/
+
+# Duplicate skill copy in a different agent-format layout (same content as
+# .agents/skills/, produced by the skills installer for non-Claude-Code
+# agents); not used by Claude Code and not something we authored.
+/agent/
+
+# Vendored upstream reference repos (own git history; not part of this repo)
+reference/
+
+# Local data caches
+.qlib/
+
+# OS
+.DS_Store

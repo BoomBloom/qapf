@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "skills": {
+    "ablate-ai-layer": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ablate-ai-layer/SKILL.md",
+      "computedHash": "b2c91b87ac45d38fd593523234665c875513a3ae1e11b4dbd26a78e8244e5408"
+    },
+    "agent-browser": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/agent-browser/SKILL.md",
+      "computedHash": "b93b77d9a63143fcefa7d371c1fceba58f1f310ef76a5f2ad3d4d2077efa8c25"
+    },
+    "ast-grep": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ast-grep/SKILL.md",
+      "computedHash": "3bca45167617f547e97454ae16d271ba3aeb2550d89e6ef1942057bd122c0061"
+    },
+    "build-dark-factory": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/build-dark-factory/SKILL.md",
+      "computedHash": "1986b0885e683e652fc26ca510f890fd843f85aed5eb25422de20edefd9ffc13"
+    },
+    "hooks-create": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/hooks-create/SKILL.md",
+      "computedHash": "2394c17ee7a42409c76f650ce049faaee932d8587be763b21a1955ddce755d7e"
+    },
+    "opportunity-scan": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/opportunity-scan/SKILL.md",
+      "computedHash": "1a5bf04289e82c3d3914988c101bf48c975c4e2815652d3fbe885b72adde5255"
+    },
+    "piv-commit": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-commit/SKILL.md",
+      "computedHash": "05ee3013f1fb72008fc9739bace34ee08d1f1d38b441affada19acc7657c4fbb"
+    },
+    "piv-create-pr": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-create-pr/SKILL.md",
+      "computedHash": "ecb128422e3b7860943147044f55cd27ecac407a62b01c74d83db0f17f07c76d"
+    },
+    "piv-fix-review-findings": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-fix-review-findings/SKILL.md",
+      "computedHash": "98b6a919c23cd0dc4653b27e453fed064a5e6ae606810c9da4cab529cbcad67d"
+    },
+    "piv-implement": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-implement/SKILL.md",
+      "computedHash": "12d184b8644bc632f23aac45ff1fb021468587fb72fe2d7851a03850a2a0625b"
+    },
+    "piv-implement-issue": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-implement-issue/SKILL.md",
+      "computedHash": "11c29ac49cd90b5b6c2d38fd2ed5353284590de2e94fd5038def7370b97be613"
+    },
+    "piv-investigate-issue": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-investigate-issue/SKILL.md",
+      "computedHash": "757c16c10e8eb6d309f59bfc9415ca563de79d3b144d72d630ab3583b03f4d31"
+    },
+    "piv-plan-implementation": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-plan-implementation/SKILL.md",
+      "computedHash": "dd40fdc946921f1b294a45a576fa3cec237dde9977f3449191c929f294e41f65"
+    },
+    "piv-review-changes": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-review-changes/SKILL.md",
+      "computedHash": "8dfb2e5c8c7f2154679174b8e55d0bfa65b714af72d3b0544764d9bcc9ccdafe"
+    },
+    "piv-review-pr": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-review-pr/SKILL.md",
+      "computedHash": "5f484c474c66fafbf2713464d6e43aad27416913632b20f2208084f43bc986a8"
+    },
+    "piv-run-full-loop": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-run-full-loop/SKILL.md",
+      "computedHash": "3fc77268592b5a58585e839d650ab2e9b834b02ae50e58c2552e6b34ad339a61"
+    },
+    "piv-slice-epic": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-slice-epic/SKILL.md",
+      "computedHash": "3e7a0fa4fd514e284679e311c1588ebbfcd2bb94b682a5f39ab4f66104dde98f"
+    },
+    "piv-validate": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/piv-validate/SKILL.md",
+      "computedHash": "b4c4e86832ffc287f2446e0bb45fe4a8e1e559e42020b8c708033ca886f370a3"
+    },
+    "plan-architecture": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/plan-architecture/SKILL.md",
+      "computedHash": "0fd144e2b46c0cfe450b06c5d9f4ce115de810dc70e749922ff50676cb99a457"
+    },
+    "plan-create-prd": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/plan-create-prd/SKILL.md",
+      "computedHash": "f09fa3b3e309887bbbb870547c39ef69dfe666ffe93c3cc5aebe5b35135783b9"
+    },
+    "plan-create-stories": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/plan-create-stories/SKILL.md",
+      "computedHash": "b3d0ec96be0a02dbde83a20b5f947b4f876abe2de1731fb04538577974e8f2ec"
+    },
+    "prime-backend": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/prime-backend/SKILL.md",
+      "computedHash": "f45867e4230fe16e0b1df33d497def4c309e33526ec777564f4fccc6f9733d29"
+    },
+    "prime-codebase": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/prime-codebase/SKILL.md",
+      "computedHash": "f57d3ad504627bde36935ee74c5c81a3e7b50c22bdfa38bb093a94c1e6017939"
+    },
+    "prime-frontend": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/prime-frontend/SKILL.md",
+      "computedHash": "694b1f06ad033f91e8d7a30566dcfc4bf566145ec7ac882d35716d83221afd91"
+    },
+    "rules-check-drift": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/rules-check-drift/SKILL.md",
+      "computedHash": "42f60d41afe47a22f599128c2d65a29d9705acf70f4b39992affc8879dd0b648"
+    },
+    "rules-create-global": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/rules-create-global/SKILL.md",
+      "computedHash": "8f61168368d81880fbb7a4baf9eaaf2a8e6bedebaddb0e5eb0f6a69e6541ddca"
+    },
+    "second-brain-audit": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/second-brain-audit/SKILL.md",
+      "computedHash": "644c6644ab25d2554eded5b0b90aee69960262a99062499c5a4721d9c388bcc5"
+    },
+    "setup-ai-tutor": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/setup-ai-tutor/SKILL.md",
+      "computedHash": "bbde0aaa67d3515ef81048d285fd29bba9c34f945d206dfa340b331011e95a76"
+    },
+    "skills-create": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/skills-create/SKILL.md",
+      "computedHash": "15725b0eefcd70df74f29cc2914de0b6978e8fd1dba70e6410c0c32bc2e8b17b"
+    },
+    "system-evolution-review": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/system-evolution-review/SKILL.md",
+      "computedHash": "f622b4f57d3d99eba672bfd3cd5557d2dcd5ee18d3d46809eaf5a590a02203ee"
+    },
+    "system-execution-report": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/system-execution-report/SKILL.md",
+      "computedHash": "dddf5d8e9a1fb5e64f98185a84482daf110dc73ca5749c073f2af66d1f8eaa60"
+    },
+    "worktree-create": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/worktree-create/SKILL.md",
+      "computedHash": "3395f30c4c35cfed0106ddfd612774fcafc9b37e3d0d7799d8cad6f657a3abb5"
+    },
+    "worktree-merge": {
+      "source": "coleam00/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/worktree-merge/SKILL.md",
+      "computedHash": "417ca6ec1461db59eb7bef5830952e5adeb180533dcf66247d607e3bda6c0770"
+    }
+  }
+}

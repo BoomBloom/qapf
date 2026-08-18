@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qapf-backend"
+version = "0.1.0"
+description = "QAPF backend — agent implementations, orchestration, and services"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.0",
+    "arxiv>=2.1",
+    "PyGithub>=2.3",
+    "requests>=2.32",
+    "numpy>=1.26",
+    "pandas>=2.0",
+    "scipy>=1.11",
+    "statsmodels>=0.14",
+    "yfinance>=0.2",
+]
+
+[tool.setuptools.packages.find]
+include = ["agents*", "core*", "api*", "models*", "services*", "risk*"]
