@@ -22,7 +22,8 @@ reference/qlib/           MIT fork basis — data/backtest/execution/optimizatio
 backend/core/             (not yet built) event_bus.py, state_graph.py (our fork of TradingAgents' graph), config.py
 backend/api/              (not yet built) FastAPI app: main.py, routes/, websockets/
 backend/models/           (not yet built) Pydantic v2 schemas — inter-agent events + API DTOs
-backend/services/         (not yet built) business logic + Qlib integration wrappers
+backend/services/         DROPPED (2026-08-18) — Qlib usage lives inside each owning agent's own folder
+                          instead (Agent 9's actual precedent). See "Where new code goes" below.
 backend/agents/research/  BUILT & verified live (2026-08-18) — arXiv + GitHub ingestion (Agent 3).
                           See backend/agents/research/pipeline.py. Run: `python -m agents.research`.
 backend/agents/stats/     BUILT & verified live (2026-08-18) — stationarity (ADF/KPSS), cointegration
@@ -43,15 +44,19 @@ backend/agents/backtest/  BUILT & verified live (2026-08-18) — walk-forward ba
                           2018-2020 (spans COVID) on Qlib's own bundled price data for execution, NOT
                           live yfinance -- see backtest/walkforward.py's module docstring for why.
                           Run: `python -m agents.backtest`.
-backend/agents/           other 11 agents not yet built (incl. Agents 13-16, added 2026-08-18 to cover
+backend/risk/             BUILT & verified live (2026-08-18) — VaR/CVaR (historical + parametric),
+                          drawdown tracking, hard kill-switch (Agent 10/CRO). Import-isolation enforced by
+                          an AST-based test, not just convention. Run: `python -m risk`.
+backend/agents/           other 10 agents not yet built (incl. Agents 13-16, added 2026-08-18 to cover
                           compliance, model risk, data reliability, and treasury) — see README's roster
-backend/risk/             (not yet built) isolated CRO — see Ground Rules below, non-negotiable isolation
 .claude/references/       On-demand detail, e.g. qlib-known-issues.md. Add new ones here as they recur.
 .venv/                    Python 3.12 (NOT system Python, which is 3.14 — see qlib-known-issues.md)
 ```
 
-**Only `backend/agents/research/` exists so far** (Agent 3). The rest of the architecture map above is
-the target layout — build into it, don't invent a different one.
+**Agents 3, 4, 6, 7, 9, and 10 exist so far** (research, stats, macro, alpha, backtest, risk/CRO — see
+each row above for what's built vs. deferred within it). The rest of the architecture map is the target
+layout — build
+into it, don't invent a different one.
 
 ## Ground rules (specific decisions, not slogans)
 
@@ -121,6 +126,10 @@ the target layout — build into it, don't invent a different one.
   Agent 6, then runs bounds / factor-direction / look-ahead / regime-sensitivity checks).
 - Run the backtest agent manually: `cd backend && python -m agents.backtest` (walk-forward backtest,
   2018-2020, ~30-60s; needs `qlib.init()` against the bundled US dataset, already downloaded).
+- Run the CRO manually: `cd backend && python -m risk` (~30-60s — reruns Agent 9's backtest as a real-data
+  test fixture, not a risk-engine dependency). Reports the kill-switch illustration and stops there until
+  `max_drawdown_pct`/`max_daily_loss_pct` are set in `__main__.py` — a risk-appetite decision, deliberately
+  not defaulted by the agent.
 - No test suite or lint config exists yet. Add real commands here the moment they do — don't leave this
   section aspirational.
 
@@ -140,7 +149,11 @@ the target layout — build into it, don't invent a different one.
 - A new graph node wiring an agent into the orchestrator → `backend/core/state_graph.py` (our fork of
   `GraphSetup`), following the existing node/edge pattern — don't invent a second orchestration
   mechanism alongside it.
-- A new Qlib-backed capability (backtest variant, optimizer extension) → `backend/services/`, wrapping
-  the relevant `reference/qlib/qlib/...` module rather than reimplementing it, unless
-  `qlib-known-issues.md` says that part of Qlib is broken.
+- A new Qlib-backed capability (backtest variant, optimizer extension) → directly inside the owning
+  agent's `backend/agents/<name>/` module, importing `reference/qlib/qlib/...` there rather than
+  reimplementing it (unless `qlib-known-issues.md` says that part of Qlib is broken). `backend/services/`
+  was the original plan but Agent 9 never used it — it imports `qlib` straight into `backend/agents/
+  backtest/`, and that's the actual precedent now (decided 2026-08-18, see
+  `docs/qapf-remaining-agents.spec.md`). Don't create `backend/services/` for this; Agents 2, 11, and 12
+  follow the same rule.
 - A new API/WebSocket surface → `backend/api/routes/` or `backend/api/websockets/`.

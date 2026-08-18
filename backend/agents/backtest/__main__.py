@@ -102,7 +102,7 @@ def main():
     print("Chaining: Agent 6 (regime) -> Agent 7 (signal) -> Qlib backtest -> Agent 4 (DSR)\n")
 
     backtester = WalkForwardBacktester()
-    report = backtester.run(prices, volumes, test_start=TEST_START, test_end=TEST_END)
+    report, _daily_returns = backtester.run(prices, volumes, test_start=TEST_START, test_end=TEST_END)
 
     print(f"Rebalances: {report.n_rebalances}")
     print(f"Universe:   {report.universe}\n")

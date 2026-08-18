@@ -345,7 +345,36 @@ rebalance using only data available as of that date.
   mechanics and the overfitting check (DSR) were the higher-priority half to
   get right first.
 
-- Wire CRO's real-time VaR/CVaR/drawdown against backtest then paper-trade output.
+**Agent 10 (Chief Risk Officer) is built and verified live** as of 2026-08-18: `backend/risk/`. Run with
+`cd backend && python -m risk`. Historical + parametric VaR/CVaR, drawdown tracking, and a hard kill-switch
+on drawdown/daily-loss limits.
+
+- **Isolation is enforced by a test, not a convention.** An AST-based scan (not a text grep, so a forbidden
+  import can't hide behind a comment) confirms nothing under `backend/risk/` imports `backend.core` or
+  LangGraph — the module's actual source (`metrics.py`, `monitor.py`) has zero dependency on either; only
+  the verification runner separately reuses Agent 9's backtest as a real-data test fixture.
+- **Cross-agent consistency, not just internal self-consistency:** `backend/risk/metrics.py`'s
+  `max_drawdown()` is an independent implementation from Agent 9's own drawdown calculation in
+  `walkforward.py`. Run against the same real 2018-2020 backtest, both agree exactly: -36.68%. (This
+  required a small refactor: `WalkForwardBacktester.run()` previously returned only summary stats, not the
+  daily-returns series other agents need — it now returns both, so Agent 14's Model Risk won't have to
+  duplicate the same Qlib wiring to get the same series a third time.)
+- **The fat-tail relationship was verified, not assumed.** Agent 4 had already measured KO's daily-return
+  kurtosis at ~5.1 against the normal distribution's 3.0. The real portfolio-strategy return series here
+  has kurtosis 11.36 — even fatter — and historical VaR (0.0272) correctly exceeds parametric/Gaussian VaR
+  (0.0266) on the same data, confirming a Gaussian risk model understates real tail risk here, not just in
+  theory.
+- **The kill-switch illustration produced a genuine, unplanned validation:** scanning the real COVID-crash
+  backtest at a 25% max-drawdown limit shows the kill switch would have triggered on **2020-02-27** — the
+  actual historical date that crash began, not a number tuned to look right. At a 15% limit it triggers
+  far earlier, 2018-11-19, during that year's real Q4 selloff.
+- **The actual risk limits (`max_drawdown_pct`, `max_daily_loss_pct`) are deliberately left unset** in
+  `backend/risk/__main__.py`, pending the user's own risk-appetite decision — informed by the illustration
+  above, not invented as a default. This is a values decision, not a technical one.
+- Deliberately deferred, not built: Kupiec-style VaR-model backtesting (counting VaR exceptions against the
+  confidence level's implied rate) — a real refinement, but the hard drawdown/daily-loss limits were the
+  higher-priority piece to get right first.
+
 - Dashboard: equity curves, drawdown, Monte Carlo distributions, risk gauges.
 
 ### Phase 4 — Portfolio, execution, operations

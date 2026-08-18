@@ -116,11 +116,18 @@ class WalkForwardBacktester:
         n_drop: int = 2,
         account: float = 1_000_000,
         n_trials: int = 4,
-    ) -> BacktestReport:
+    ) -> tuple[BacktestReport, pd.Series]:
         """`n_trials=4` reflects the 4 hand-set factors Agent 7 combines; it is
         a stated assumption, not a measured count of strategies actually
         tried, and is surfaced in the report rather than hidden inside a
-        single opaque Sharpe number."""
+        single opaque Sharpe number.
+
+        Returns `(report, daily_returns)` -- the report is the summary, but
+        the raw daily-returns series is real signal other agents need too
+        (Agent 10's CRO cross-checks its own drawdown math against it; Agent
+        14's Model Risk will want the same series). Returning it here avoids
+        every future consumer re-deriving it by duplicating this method's
+        Qlib wiring."""
         test_start_ts, test_end_ts = pd.Timestamp(test_start), pd.Timestamp(test_end)
 
         candidate_dates = pd.date_range(test_start_ts, test_end_ts, freq=rebalance_freq)
@@ -172,7 +179,7 @@ class WalkForwardBacktester:
         )
         dsr_result = self.stats.deflated_sharpe_ratio(daily_returns, n_trials=n_trials)
 
-        return BacktestReport(
+        report = BacktestReport(
             universe=list(prices.columns),
             start=test_start,
             end=test_end,
@@ -187,3 +194,4 @@ class WalkForwardBacktester:
             deflated_sharpe_n_trials=n_trials,
             rebalance_log=rebalance_log,
         )
+        return report, daily_returns
