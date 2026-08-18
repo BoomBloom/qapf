@@ -15,6 +15,11 @@ node_modules/
 # Vendored upstream reference repos (own git history; not part of this repo)
 reference/
 
+# Secrets — never commit. API keys are read from here via the environment.
+.env
+.env.*
+!.env.example
+
 # Local data caches
 .qlib/
 

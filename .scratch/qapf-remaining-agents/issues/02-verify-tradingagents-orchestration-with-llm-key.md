@@ -15,9 +15,51 @@ The cost number is the point, not a nice-to-have. `README.md` already flags per-
 open scope risk for a multi-agent debate graph; this ticket is what turns that from a worry into a
 measured number, before Agents 1 and 8 are built on the assumption it's affordable.
 
-**Blocked by:** None in code — but requires an LLM API key to be provided.
+**Blocked by:** None in code. Keys are now configured; blocked on external provider capacity.
 
-**Status:** ready-for-agent (blocked on a human providing credentials)
+**Status:** in-progress — partially verified 2026-08-18, see findings below
+
+## Findings so far (2026-08-18)
+
+Three provider keys were supplied and all three authenticate successfully. **The remaining blocker is
+provider capacity, not credentials — supplying more keys will not help.**
+
+| Provider | Auth | Tool calling | Blocker |
+|---|---|---|---|
+| Groq (`openai/gpt-oss-20b`, `-120b`) | works | **verified working** | Free tier caps at 8,000 tokens/min; a single Market Analyst call needs 8,179 → hard `413`. Unusable without a paid tier. |
+| Gemini (`gemini-flash-latest`) | works | **verified working** | Intermittent `503 UNAVAILABLE` ("high demand"), persisting through 8 retries. **Got furthest: completed a full Market Analyst node.** |
+| Gemini (`gemini-pro-latest`) | works | not reached | `429` quota exceeded — no free-tier quota on this key. |
+| NVIDIA NIM (`llama-3.3-70b-instruct`) | works (102 models listed) | not reached | Inference request timed out >2 min (free-tier cold start). |
+
+### What IS verified
+
+- **TradingAgents installs cleanly alongside Qlib in the same venv** — no dependency conflict, and
+  critically `pandas`/`numpy` were untouched by the install, so Agents 3/4/6/7/9/10 still work
+  (re-verified after install). This was a real open risk for Agent 1 and it is now settled: the two
+  upstreams can coexist.
+- **TradingAgents' own client factory routes correctly to a third-party provider** — `create_llm_client`
+  returned a working client pointed at Groq's endpoint and completed a round trip.
+- **The graph starts and executes real nodes** — the Market Analyst node completed against live market
+  data on Gemini before the run hit a 503 further along.
+- Groq is natively supported (provider registry entry, `GROQ_API_KEY`) — an earlier assumption that it
+  was unsupported came from reading client *filenames* rather than the provider registry, and was wrong.
+
+### What is NOT yet verified (the reason this ticket stays open)
+
+- A complete end-to-end graph run (analyst → bull/bear debate → research manager → trader → risk debate →
+  portfolio manager) has never finished.
+- **The per-decision token/cost number — the actual point of this ticket — is still unmeasured.**
+
+### Next step when capacity allows
+
+Retry Gemini Flash when demand subsides (most likely to simply work), or move one provider to a paid tier
+(Groq's Dev tier is the cheapest fix, since its blocker is a hard quota rather than variable load).
+
+### Note on the diagnostic method
+
+A `403` from Groq initially looked like a permissions failure; it was actually `urllib`'s default
+`User-Agent` being rejected at the edge, while an identical `curl` succeeded. Recorded because it is the
+same class of error this project keeps hitting: a failure that indicts the wrong component.
 
 - [ ] An API key is configured in a way that is gitignored and never committed.
 - [ ] `reference/TradingAgents` runs its graph end to end on at least one ticker without erroring.
