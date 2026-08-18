@@ -25,3 +25,6 @@ reference/
 
 # OS
 .DS_Store
+
+# Dashboard data snapshot — regenerate with `python -m dashboard.export`
+frontend/data/snapshot.json

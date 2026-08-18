@@ -52,14 +52,26 @@ backend/agents/backtest/  BUILT & verified live (2026-08-18) — walk-forward ba
 backend/risk/             BUILT & verified live (2026-08-18) — VaR/CVaR (historical + parametric),
                           drawdown tracking, hard kill-switch (Agent 10/CRO). Import-isolation enforced by
                           an AST-based test, not just convention. Run: `python -m risk`.
-backend/agents/           other 9 agents not yet built (incl. Agents 13-16, added 2026-08-18 to cover
-                          compliance, model risk, data reliability, and treasury) — see README's roster
+backend/agents/execution/ BUILT (2026-08-19) — TWAP/VWAP scheduling + square-root market impact (Agent 11).
+backend/agents/operations/ BUILT (2026-08-19) — target-vs-fill reconciliation, PnL attribution as an
+                          identity that must close to zero (Agent 12).
+backend/agents/compliance/ BUILT (2026-08-19) — restricted list, position/sector limits, wash-trading
+                          patterns, audit trail. Separate from the CRO by design (Agent 13).
+backend/agents/modelrisk/ BUILT (2026-08-19) — independently challenges Agent 9: decay, regime coverage,
+                          return concentration (Agent 14).
+backend/agents/datainfra/ BUILT (2026-08-19) — feed staleness/gap/schema-drift monitoring; its regression
+                          suite re-detects all four data defects this project actually hit (Agent 15).
+backend/dashboard/        BUILT (2026-08-19) — export.py runs the whole pipeline and writes
+                          frontend/data/snapshot.json. All dashboard numbers come from here.
+frontend/index.html       BUILT (2026-08-19) — single-page dashboard over the snapshot. Serve it:
+                          `python3 -m http.server 8402 --directory frontend` (fetch() needs http, not file://).
+backend/agents/           Agents 1 and 8 blocked on a funded LLM provider; 5 and 16 deferred by policy
 .claude/references/       On-demand detail, e.g. qlib-known-issues.md. Add new ones here as they recur.
 .venv/                    Python 3.12 (NOT system Python, which is 3.14 — see qlib-known-issues.md)
 ```
 
-**Agents 2, 3, 4, 6, 7, 9, and 10 exist so far** (portfolio, research, stats, macro, alpha, backtest,
-risk/CRO — see each row above for what's built vs. deferred within it). The rest of the architecture map
+**12 of 16 agents are built** (2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15). Agents 1 and 8 are blocked on a
+funded LLM provider; 5 and 16 are deferred by policy — see each row above. The rest of the architecture map
 is the target layout — build into it, don't invent a different one.
 
 ## Ground rules (specific decisions, not slogans)
@@ -130,6 +142,10 @@ is the target layout — build into it, don't invent a different one.
   Agent 6, then runs bounds / factor-direction / look-ahead / regime-sensitivity checks).
 - Run the portfolio agent manually: `cd backend && python -m agents.portfolio` (chains Agent 6 -> 7 -> 2
   on live data; runs bounds / position-cap / shrinkage-conditioning / regime / all-cash checks).
+- Run any agent: `cd backend && python -m agents.<name>` — research, stats, macro, alpha, portfolio,
+  execution, operations, compliance, modelrisk, datainfra, backtest (and `python -m risk` for the CRO).
+- Regenerate the dashboard data: `cd backend && python -m dashboard.export` (~60s, runs everything).
+- Serve the dashboard: `python3 -m http.server 8402 --directory frontend` then open localhost:8402.
 - Run the backtest agent manually: `cd backend && python -m agents.backtest` (walk-forward backtest,
   2018-2020, ~30-60s; needs `qlib.init()` against the bundled US dataset, already downloaded).
 - Run the CRO manually: `cd backend && python -m risk` (~30-60s — reruns Agent 9's backtest as a real-data
