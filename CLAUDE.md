@@ -39,6 +39,11 @@ backend/agents/alpha/     BUILT & verified live (2026-08-18) — pandas factor c
                           5d reversal, low-vol, volume trend), cross-sectional rank normalization to
                           [-1,+1], regime-conditional weighting that CONSUMES Agent 6's output (Agent 7).
                           Deliberately avoids Qlib's broken expression engine. Run: `python -m agents.alpha`.
+backend/agents/portfolio/ BUILT & verified live (2026-08-19) — turns Agent 7's signals into position sizes
+                          via Qlib's PortfolioOptimizer + Ledoit-Wolf shrinkage covariance, with
+                          regime-conditional optimizer choice (Agent 2). LONG-ONLY by deliberate
+                          decision (Qlib's optimizer hard-codes no-shorting; margin/borrow are
+                          unmodeled) — see allocator.py's docstring. Run: `python -m agents.portfolio`.
 backend/agents/backtest/  BUILT & verified live (2026-08-18) — walk-forward backtest chaining Agent 6 ->
                           Agent 7 -> Qlib's verified backtest engine -> Agent 4's DSR (Agent 9). Runs
                           2018-2020 (spans COVID) on Qlib's own bundled price data for execution, NOT
@@ -47,16 +52,15 @@ backend/agents/backtest/  BUILT & verified live (2026-08-18) — walk-forward ba
 backend/risk/             BUILT & verified live (2026-08-18) — VaR/CVaR (historical + parametric),
                           drawdown tracking, hard kill-switch (Agent 10/CRO). Import-isolation enforced by
                           an AST-based test, not just convention. Run: `python -m risk`.
-backend/agents/           other 10 agents not yet built (incl. Agents 13-16, added 2026-08-18 to cover
+backend/agents/           other 9 agents not yet built (incl. Agents 13-16, added 2026-08-18 to cover
                           compliance, model risk, data reliability, and treasury) — see README's roster
 .claude/references/       On-demand detail, e.g. qlib-known-issues.md. Add new ones here as they recur.
 .venv/                    Python 3.12 (NOT system Python, which is 3.14 — see qlib-known-issues.md)
 ```
 
-**Agents 3, 4, 6, 7, 9, and 10 exist so far** (research, stats, macro, alpha, backtest, risk/CRO — see
-each row above for what's built vs. deferred within it). The rest of the architecture map is the target
-layout — build
-into it, don't invent a different one.
+**Agents 2, 3, 4, 6, 7, 9, and 10 exist so far** (portfolio, research, stats, macro, alpha, backtest,
+risk/CRO — see each row above for what's built vs. deferred within it). The rest of the architecture map
+is the target layout — build into it, don't invent a different one.
 
 ## Ground rules (specific decisions, not slogans)
 
@@ -124,6 +128,8 @@ into it, don't invent a different one.
   key needed — uses FRED's keyless CSV endpoint, not the keyed JSON API).
 - Run the alpha agent manually: `cd backend && python -m agents.alpha` (pulls the live regime from
   Agent 6, then runs bounds / factor-direction / look-ahead / regime-sensitivity checks).
+- Run the portfolio agent manually: `cd backend && python -m agents.portfolio` (chains Agent 6 -> 7 -> 2
+  on live data; runs bounds / position-cap / shrinkage-conditioning / regime / all-cash checks).
 - Run the backtest agent manually: `cd backend && python -m agents.backtest` (walk-forward backtest,
   2018-2020, ~30-60s; needs `qlib.init()` against the bundled US dataset, already downloaded).
 - Run the CRO manually: `cd backend && python -m risk` (~30-60s — reruns Agent 9's backtest as a real-data

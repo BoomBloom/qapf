@@ -378,6 +378,36 @@ on drawdown/daily-loss limits.
 - Dashboard: equity curves, drawdown, Monte Carlo distributions, risk gauges.
 
 ### Phase 4 — Portfolio, execution, operations
+
+**Agent 2 (Portfolio Manager & Allocation) is built and verified live** as of 2026-08-19:
+`backend/agents/portfolio/`. Run with `cd backend && python -m agents.portfolio`. Chains Agent 6
+(regime) → Agent 7 (signals) → Agent 2 (position sizes), replacing Agent 9's `TopkDropoutStrategy`
+placeholder with real portfolio construction on Qlib's `PortfolioOptimizer` and Ledoit-Wolf shrinkage
+covariance.
+
+- **Two decisions were made deliberately rather than defaulted into, both documented in the code:**
+  (1) **Long-only.** Qlib's optimizer hard-codes `Bounds(0.0, 1.0)` while Agent 7 emits `[-1, +1]`
+  signals with real short candidates. Rather than silently dropping shorts or silently widening the
+  bounds, negative-signal names get zero weight and their capital stays in cash — shorting needs borrow,
+  margin, and its own risk treatment, none of which exist yet (Agent 16 is deferred). (2) **Signals are
+  treated as scores, not return forecasts** — defensible because Qlib's optimizer rescales `r` to asset
+  volatility, but not rigorous; that's what ticket 06 (Black-Litterman) is for.
+- **A real bug was found in this agent's own first implementation and fixed:** a 35% per-position cap was
+  silently producing an 80% position. The cause was ordering — clipping weights and *then* renormalizing
+  mathematically undoes the clip (if one name holds everything, dividing by the new sum returns it to
+  1.0). Replaced with water-filling (cap, redistribute the excess to uncapped names, repeat). Notably the
+  original test suite passed this bug, because it asserted only that total exposure ≤ 100% and never
+  asserted the per-position cap it was supposedly enforcing — the missing assertion has been added.
+- **Verified with an independent numerical check, not a textbook claim:** Ledoit-Wolf shrinkage is used
+  because mean-variance optimization inverts the covariance matrix and sample covariance is badly
+  conditioned. Measured on real data, shrinkage improved the condition number 36.3 → 27.7 (1.3×).
+- **An honest limitation, recorded rather than glossed:** Spearman correlation between signal and
+  resulting weight is **−0.107** — the alpha signal barely drives the allocation, because covariance
+  structure dominates when the "expected returns" fed to MVO are rank-normalized scores rather than
+  actual return forecasts. This is the concrete motivation for ticket 06, not a footnote.
+- Deliberately deferred, not built: HRP and Kelly sizing (both named in the roster). Black-Litterman is
+  ticket 06.
+
 - Extend Qlib's `PortfolioOptimizer` with Black-Litterman / HRP / Kelly.
 - Extend Qlib's exchange/executor toward live broker APIs.
 - Agent 12 (Operations) on Qlib's experiment tracking.
