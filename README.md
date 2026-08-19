@@ -204,10 +204,22 @@ The single highest-value thing to do first, because it de-risks everything after
   `PaginatedList` raises `IndexError` when sliced past its actual result count
   (worked around with `itertools.islice`), and naive `$...$` regex extraction
   picks up bare numbers as false "math concepts" (filtered out).
-- Extend the forked graph with nodes for Agents 2–12 (most as stubs initially),
-  rather than building a LangGraph pipeline from scratch.
 - Stand up the isolated CRO (`backend/risk/`) as its own process with a
   deterministic loop and kill-switch **from day one**, not retrofitted later.
+- **Agent 1 (Lead Orchestrator) is built and verified live** as of 2026-08-19:
+  `backend/core/`. Run with `cd backend && python -m core`. Forks TradingAgents'
+  `GraphSetup`/`StateGraph` wiring and provider-agnostic LLM client factory
+  directly (Apache-2.0), but wires QAPF's own already-built deterministic
+  agents as nodes instead of rebuilding TradingAgents' 8-persona LLM debate —
+  see `backend/core/state_graph.py`'s module docstring for why duplicating
+  that debate would be redundant now that Agents 2/6/7/10 exist. Pipeline:
+  macro -> alpha -> portfolio -> risk_gate -> [execution -> compliance] ->
+  cio_synthesis, with exactly one LLM call (Anthropic, the final synthesis).
+  `risk_gate` doubles as the kill-switch enforcement wayfinder ticket 12
+  asked for: a halted state skips straight to the CIO memo, so zero orders
+  are ever constructed once the CRO trips — verified against Agent 9's real
+  2018-2020 backtest, which finds and halts at the actual 2020-03-09 COVID
+  breach date while a calm pre-breach window still produces real orders.
 
 ### Phase 2 — Statistics, alpha, engineering
 - **Agent 4 (Probability & Statistics) is built and verified live** as of

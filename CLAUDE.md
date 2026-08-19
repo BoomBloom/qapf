@@ -19,7 +19,16 @@ reference/TradingAgents/  Apache-2.0 fork basis — LangGraph orchestration grap
                           Read reference/TradingAgents/tradingagents/graph/ before touching orchestration.
 reference/qlib/           MIT fork basis — data/backtest/execution/optimization engine.
                           Read .claude/references/qlib-known-issues.md BEFORE using its expression engine.
-backend/core/             (not yet built) event_bus.py, state_graph.py (our fork of TradingAgents' graph), config.py
+backend/core/             BUILT & verified live (2026-08-19) — state_graph.py (Agent 1, Lead Orchestrator),
+                          config.py. LangGraph pipeline: macro -> alpha -> portfolio -> risk_gate ->
+                          [execution -> compliance] -> cio_synthesis. Only ONE LLM node (cio_synthesis,
+                          Anthropic claude-sonnet-5) — every other node wraps an already-built
+                          deterministic agent; see state_graph.py's docstring for why 3/4/9/12/14/15 are
+                          deliberately NOT graph nodes. risk_gate is also wayfinder ticket 12's
+                          kill-switch enforcement: a halted state skips execution/compliance entirely
+                          (zero orders constructed, not just zero sent), verified against Agent 9's real
+                          2018-2020 COVID-crash backtest. event_bus.py not built — no consumer yet.
+                          Run: `python -m core`.
 backend/api/              (not yet built) FastAPI app: main.py, routes/, websockets/
 backend/models/           (not yet built) Pydantic v2 schemas — inter-agent events + API DTOs
 backend/services/         DROPPED (2026-08-18) — Qlib usage lives inside each owning agent's own folder
@@ -65,14 +74,14 @@ backend/dashboard/        BUILT (2026-08-19) — export.py runs the whole pipeli
                           frontend/data/snapshot.json. All dashboard numbers come from here.
 frontend/index.html       BUILT (2026-08-19) — single-page dashboard over the snapshot. Serve it:
                           `python3 -m http.server 8402 --directory frontend` (fetch() needs http, not file://).
-backend/agents/           Agents 1 and 8 blocked on a funded LLM provider; 5 and 16 deferred by policy
+backend/agents/           Agent 8 (code-gen) not yet built; 5 and 16 deferred by policy
 .claude/references/       On-demand detail, e.g. qlib-known-issues.md. Add new ones here as they recur.
 .venv/                    Python 3.12 (NOT system Python, which is 3.14 — see qlib-known-issues.md)
 ```
 
-**12 of 16 agents are built** (2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15). Agents 1 and 8 are blocked on a
-funded LLM provider; 5 and 16 are deferred by policy — see each row above. The rest of the architecture map
-is the target layout — build into it, don't invent a different one.
+**13 of 16 agents are built** (1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15). Agent 8 (code-gen) is next;
+5 and 16 are deferred by policy — see each row above. The rest of the architecture map is the target
+layout — build into it, don't invent a different one.
 
 ## Ground rules (specific decisions, not slogans)
 
@@ -144,6 +153,10 @@ is the target layout — build into it, don't invent a different one.
   on live data; runs bounds / position-cap / shrinkage-conditioning / regime / all-cash checks).
 - Run any agent: `cd backend && python -m agents.<name>` — research, stats, macro, alpha, portfolio,
   execution, operations, compliance, modelrisk, datainfra, backtest (and `python -m risk` for the CRO).
+- Run the orchestrator manually: `cd backend && python -m core` (Agent 1 — chains macro -> alpha ->
+  portfolio -> risk_gate -> execution -> compliance -> a real Anthropic-backed CIO synthesis; makes one
+  paid Claude call per invocation, ~10-15s, real cost — see backend/core/config.py's two-tier LLM note
+  before running this often). Needs GROQ_API_KEY and ANTHROPIC_API_KEY in `.env`.
 - Regenerate the dashboard data: `cd backend && python -m dashboard.export` (~60s, runs everything).
 - Serve the dashboard: `python3 -m http.server 8402 --directory frontend` then open localhost:8402.
 - Run the backtest agent manually: `cd backend && python -m agents.backtest` (walk-forward backtest,
