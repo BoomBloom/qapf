@@ -17,9 +17,15 @@ whether the full LangGraph orchestrator ever gets built, so a minimal hook — e
 `ExecutionPlanner` or whatever assembles the final order list checks Agent 10's verdict first and
 refuses to emit orders when triggered — should exist independent of Agent 1.
 
-**Blocked by ticket 01 in one sense** (the actual threshold values), but the wiring itself can be built
-and tested against the placeholder thresholds already in the code, then simply re-pointed once ticket 01
-closes.
+**Ticket 01 closed 2026-08-19** — `max_drawdown_pct=0.20`, `max_daily_loss_pct=0.06` are now real values
+in `backend/risk/__main__.py`, not placeholders. This ticket is fully unblocked.
+
+**Resume policy, decided alongside ticket 01's threshold grill:** a kill-switch halt requires
+**re-validation against the ticket 02 bar on fresh data**, not just a human flipping a switch back on. The
+enforcement built here should reflect that — the choke point should refuse to emit orders and record
+*why* in a way that makes "has this been re-validated since the last breach" a checkable fact, not just
+log a generic halt message. Exact mechanism (a flag file, a status field Agent 10 exposes, something else)
+is implementation detail for whoever takes this ticket, not decided here.
 
 ## What to build
 

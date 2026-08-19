@@ -156,13 +156,16 @@ def main():
 
     show_kill_switch_tradeoff(daily_returns)
 
-    # --- TODO (yours to set): the actual risk limits ---
-    # These two numbers are a risk-appetite decision, not a technical one --
-    # see the illustration above for what each choice would actually have done
-    # against the real 2018-2020 COVID-crash backtest. Pick values and this
-    # will report today's live assessment against them.
-    max_drawdown_pct = None  # e.g. 0.20 for "halt at 20% drawdown from peak"
-    max_daily_loss_pct = None  # e.g. 0.05 for "halt on any single day worse than -5%"
+    # Risk-appetite decision, set by the operator via wayfinder ticket 01
+    # (grilled 2026-08-19; see .scratch/wayfinder-real-capital/tickets/01-risk-limits.md).
+    # 0.20 sits closer to the 25% COVID-crash-halt anchor than the 15% anchor
+    # that would have falsely halted during ordinary Q4-2018 volatility --
+    # a premature halt is treated as the worse failure mode. 0.06 daily is
+    # widened above the typical 3-5% prop-firm range because this CRO measures
+    # close-to-close, not intraday, so it can't react mid-day the way a prop
+    # firm's intraday feed can.
+    max_drawdown_pct = 0.20
+    max_daily_loss_pct = 0.06
 
     if max_drawdown_pct is None or max_daily_loss_pct is None:
         print(

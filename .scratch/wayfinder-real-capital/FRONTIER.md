@@ -4,7 +4,7 @@ Updated 2026-08-19 after resolving ticket 07 (attempt 1 — FAILED the bar, 4 at
 
 | # | Ticket | Type | Blocked by | Takeable? |
 |---|--------|------|-----------|-----------|
-| 01 | What risk limits bind this system? | grilling (HITL) | — | YES (evidence appended, not yet decided) |
+| 01 | What risk limits bind this system? | grilling (HITL) | — | **CLOSED — 0.20/0.06, set live** |
 | 02 | What must the strategy prove? | grilling | — | CLOSED |
 | 03 | Equity data past 2020 (final holdout) | research | — | YES (off critical path) |
 | 04 | Which prop firms permit automation? | research | — | CLOSED |

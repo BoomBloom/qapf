@@ -30,6 +30,10 @@ how unvalidated strategies reach real money.
   working end-to-end pipeline, real data, and a measured baseline. Switching now discards all of it.
 - **Risk limits are a design constraint from today**, not a stage-4 concern. The backtest's -36.68% max
   drawdown is unacceptable for a $1,000 account the operator cares about, independent of any prop firm.
+- **A kill-switch halt requires re-validation to resume, not human override alone** (ticket 01). Treats a
+  live drawdown breach as evidence the strategy may be broken, not just a bad stretch.
+- **$1,000 is the fixed real-capital stage-3 target.** The strategy must be redesigned to mechanically fit
+  it (fewer/cheaper names, lower rebalance frequency) — the account size itself does not move (ticket 01).
 
 **Skills every session should consult:** `qapf-prime` before touching any agent code.
 Qlib gotchas in `.claude/references/qlib-known-issues.md`.
@@ -49,6 +53,10 @@ the regime where it bets hardest on momentum, suggesting the hand-set priors may
   risk-adjusted, and profitable net of costs at $1,000. **Five attempts**, with `n_trials` incremented
   honestly; exhausting the budget means the approach failed. Shortened the critical path — ticket 07 no
   longer waits on ticket 03.
+- [01 — What risk limits bind this system?](tickets/01-risk-limits.md) — **`max_drawdown_pct=0.20`,
+  `max_daily_loss_pct=0.06`**, set live in `backend/risk/__main__.py`. Halting requires **re-validation
+  against ticket 02's bar** before resuming, not just human discretion (feeds ticket 12). Account size
+  stays $1,000 — the strategy shrinks to fit it, not the reverse (feeds ticket 07 attempt 2).
 - [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **FAILS, attempt 1 of 5.**
   DSR 0.9636 (real signal, passes) and profitable net of real IBKR-Lite costs (+95.28%, passes), but loses
   to plain equal-weight buy-and-hold on BOTH risk-adjusted measures (Sharpe 0.564 vs 0.849; return/max-DD

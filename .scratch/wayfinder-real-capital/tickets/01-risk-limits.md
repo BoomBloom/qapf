@@ -2,7 +2,7 @@
 
 **Type:** `wayfinder:grilling`
 **Blocked by:** None — can start immediately.
-**Status:** open · unclaimed
+**Status:** CLOSED — grilled and decided, 2026-08-19
 
 ## Question
 
@@ -51,3 +51,28 @@ the alpha itself is any good.**
 Literature disagreement noted rather than papered over: Carver argues for continuous volatility-targeted
 de-risking over a binary halt; the hard-halt design is kept anyway as a deliberate simplicity/
 enforceability trade-off for a solo operator, not because the literature prefers it.
+
+## Resolution (grilled 2026-08-19)
+
+Three decisions, all confirmed by the operator against the recommendation:
+
+1. **`max_drawdown_pct = 0.20`, `max_daily_loss_pct = 0.06`** — set directly in
+   [`backend/risk/__main__.py`](../../../backend/risk/__main__.py), replacing the `None`/`None` TODO that
+   had blocked any live assessment since the CRO was built. Verified in isolation: a synthetic drawdown
+   breach correctly reports `kill_switch_triggered: true` with `breaches: ["max_drawdown"]`.
+2. **Halt behavior: re-validation required, not just human discretion.** When the kill switch trips,
+   trading stays halted until the strategy is re-run through the ticket 02 validation bar on fresh data —
+   a drawdown breach is treated as evidence the strategy may no longer work, not merely a bad stretch a
+   human can wave through. This is now the policy ticket 12's enforcement wiring should implement, not
+   just "stop and ask" — see ticket 12's update.
+3. **Account size: keep the $1,000 stage-3 target; shrink the strategy to fit, not the other way round.**
+   The 9-of-15-names-unbuyable and Carver's ~$2,500/instrument minimum findings are real, but the operator
+   chose not to redesign the account size around them — position count / rebalance frequency should adapt
+   to $1,000 instead. Logged in the map's fog as a concrete input for whatever ticket 07's attempt 2
+   becomes (fewer, cheaper names and/or lower rebalance frequency is now a stated design constraint on
+   that redesign, not just a nice-to-have).
+
+**Known follow-on, found while verifying this change, not caused by it:** `python -m risk`'s
+`test_fat_tail_relationship` failed on today's live data (historical VaR 0.0253 vs parametric VaR 0.0256,
+kurtosis 14.80) — a pre-existing, likely-too-strict assertion, unrelated to the threshold values set here.
+Flagged as a separate background task, not part of this ticket's scope.
