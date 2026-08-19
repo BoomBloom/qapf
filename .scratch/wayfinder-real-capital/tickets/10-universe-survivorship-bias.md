@@ -29,3 +29,11 @@ The decision is what to do about it, given it cannot be ignored before committin
 
 Note the interaction with ticket 02's five-attempt budget: changing the universe is arguably a new
 attempt, and should probably be counted as one.
+
+### New evidence (2026-08-19) — `docs/research/data-and-modelling-tooling.md`
+
+Changes the cost of the "fix it properly" option from a guess to a number. Originally scoped as
+"materially more work" with no estimate. Now: Qlib's own PIT constituents builder is free and already
+vendored, and delisted-price data costs $9/month via Sharadar. **"Fix it properly" may now be cheaper
+than "accept and document," which was the assumption when this ticket was opened.** Still the operator's
+decision — this is new information for it, not a resolution.

@@ -34,3 +34,23 @@ This ticket now serves the **final holdout** — the window looked at exactly on
 already cleared the bar on 2008-2017. That raises the standard for the data: it must be point-in-time
 correct, because a final holdout contaminated by survivorship or restatement bias is worse than no
 holdout at all (it manufactures false confidence at the exact moment capital is committed).
+
+### New evidence (2026-08-19) — `docs/research/data-and-modelling-tooling.md`
+
+A research pass dispatched from the operator's resource links (not itself a wayfinder ticket) found a
+concrete, mostly-free path:
+
+- **`reference/qlib/scripts/data_collector/us_index/collector.py`** (already vendored in this repo)
+  builds a point-in-time S&P 500 constituents file from 1999 — `$0`. Cross-check against MIT-licensed
+  `fja05680/sp500` before trusting it; it scrapes a user-editable Wikipedia table.
+- **`reference/qlib/scripts/dump_bin.py`** rebuilds the price bundle past the 2020-11-10 cliff — `$0`.
+  The cliff was never a data-availability problem, just a bundle nobody regenerated.
+- **Delisted-security prices are the one real gap.** Verified empirically in this repo's venv: yfinance
+  returns 0 rows for TWTR, ATVI, FRC, SIVBQ, CERN, ENRNQ. Cheapest verified fix: **Sharadar Prices,
+  $9/month**, 21,000 active+delisted tickers to 1998 (free DJIA-30 tier to trial first).
+- OpenBB rejected as a fix: no delisted data in its codebase, sells no data of its own, and is
+  AGPL-3.0 — a real license conflict with this project's Apache-2.0/MIT posture.
+
+Recommended order: `dump_bin.py` -> Qlib's PIT collector, cross-checked -> trial Sharadar's free tier ->
+re-run Agent 9 on a real 2021-2024 PIT universe. Still a TASK (AFK) — this is now well-specified enough
+to execute, not yet executed.
