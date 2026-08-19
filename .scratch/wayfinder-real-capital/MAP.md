@@ -66,13 +66,15 @@ the regime where it bets hardest on momentum, suggesting the hand-set priors may
   Mac/Wachovia's actual 2008 removals correctly captured — the vendored builder was actually broken
   against the live Wikipedia page, fixed by reading a historical revision instead). Delisted PRICE data
   still needs the operator to personally sign up for Sharadar ($9/mo) — cannot be done on their behalf.
-- [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **FAILS, attempt 1 of 5.**
-  DSR 0.9636 (real signal, passes) and profitable net of real IBKR-Lite costs (+95.28%, passes), but loses
-  to plain equal-weight buy-and-hold on BOTH risk-adjusted measures (Sharpe 0.564 vs 0.849; return/max-DD
-  1.536 vs 2.175). The 4-factor combination isn't adding value over the market it picks from — the factor
-  set itself is the binding constraint, not the regime-weighting (ticket 06) or the cost model, both
-  already fixed. 4 attempts remain. First run of this ticket was invalidated by a real cost-model bug
-  (Qlib's generic $5-per-trade minimum vs. IBKR Lite's real $0) — see the ticket for the full diagnosis.
+- [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **FAILS, attempt 2 of 5,
+  reopened.** Attempt 1: DSR 0.9636 (passes), profitable (passes), but lost to equal-weight buy-and-hold
+  on BOTH risk-adjusted measures (Sharpe 0.564 vs 0.849; return/max-DD 1.536 vs 2.175). Attempt 2 added
+  volatility-managed exposure (Moreira & Muir 2017, leverage capped at 1.0) as post-processing on the
+  SAME universe and signals — real progress: DSR 0.9615 (passes), profitable (passes), return/max-DD
+  **now beats the benchmark** (2.741 vs 2.175, flipped from a fail), but Sharpe still trails (0.726 vs
+  0.849, though much closer than attempt 1's 66%-of-benchmark ratio — now 85%). **3 attempts remain.**
+  Deliberately did NOT combine with ticket 13's PIT-universe fix in the same attempt (still incomplete
+  without Sharadar's delisted prices; conflating two variables would make neither result attributable).
 
 ## Not yet specified
 

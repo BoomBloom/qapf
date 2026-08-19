@@ -3,7 +3,7 @@
 **Type:** `wayfinder:task`
 **Blocked by:** NOTHING — 02, 05 and 06 are all closed. **This is now the frontier ticket, and the one
 where the map's destination is reached or not.**
-**Status:** CLOSED — FAILS the bar (attempt 1 of 5), 2026-08-19
+**Status:** OPEN (reopened) — FAILS the bar (attempt 2 of 5, closer), 2026-08-19
 
 ## Question
 
@@ -103,3 +103,52 @@ directly is undecided.
 Standing caveats (survivorship bias, daily-close drawdown) apply to this result exactly as anticipated —
 noted, not yet corrected; they would only make a real failure look worse, not better, so they don't change
 the verdict here.
+
+## Attempt 2 (2026-08-19) — closer, still fails
+
+Followed `docs/research/viable-alpha-families.md`'s own recommended sequence: its #1-ranked idea
+(volatility-managed exposure, Moreira & Muir JF 2017) was first tested as a cheap ~1-hour diagnostic —
+post-processing applied directly to attempt 1's real return series, no new backtest
+(`.scratch/wayfinder-real-capital/vol_managed_diagnostic.py`) — before spending a real attempt on it. That
+diagnostic showed genuine improvement (Sharpe 0.564→0.726, max drawdown -36.74%→-26.48%), which the
+research document's own falsification bar treats as "worth formalizing as a real attempt."
+
+**Deliberately isolated one variable.** Ticket 13's PIT-universe fix was NOT combined into this attempt —
+it's still incomplete (free membership correction, but no delisted-name price data without Sharadar), and
+combining an incomplete universe fix with a real strategy change in the same attempt would conflate two
+variables and make neither result attributable. The universe is byte-identical to attempt 1's 14 names.
+The PIT swap is deferred to a later attempt.
+
+**What changed:** nothing about signal generation, regime weighting, or the universe. Only a post-
+processing exposure scale on the strategy's own daily returns — 22-day realized volatility, leverage
+capped at 1.0 (long-only-and-cash compatible, matching Moreira & Muir's own tested variant), scored for
+real this time via `.scratch/wayfinder-real-capital/validate_bar_attempt2.py` with `n_trials=2`.
+
+```
+                          Strategy     Benchmark
+Total return               +128.11%      +322.75%
+Annualized Sharpe             0.726         0.849
+Max drawdown                -26.48%       -39.03%
+Return per unit DD            2.741         2.175
+
+Deflated Sharpe Ratio: 0.9615 (n_trials=2)
+Final account: $2,281.14 (started $1,000)
+```
+
+- **[PASS]** DSR > 0.95 — 0.9615.
+- **[FAIL]** Beats benchmark Sharpe — 0.726 vs 0.849. Closer than attempt 1 (0.564 vs 0.849 — the
+  strategy-to-benchmark Sharpe ratio moved from 66% to 85%), but still short.
+- **[PASS]** Beats benchmark return-per-unit-max-drawdown — 2.741 vs 2.175. This flipped from a FAIL in
+  attempt 1 to a genuine PASS — the drawdown reduction from volatility management is real and material.
+- **[PASS]** Profitable net of costs — more than doubled the account ($2,281.14).
+
+**Overall: DOES NOT CLEAR THE BAR (attempt 2 of 5).** Real, measurable progress on two of three failing
+dimensions from attempt 1, not a wash. The remaining gap is narrower and more specific than attempt 1's:
+the strategy's raw Sharpe still trails the benchmark's, even though its drawdown-adjusted return no
+longer does. **3 attempts remain.**
+
+**Candidates for attempt 3**, in order of the research document's own recommended sequence: #2 (OHLC-
+range volatility estimators — Yang-Zhang/Parkinson/Garman-Klass, an enabler that would sharpen the same
+volatility-management signal using the O/H/L columns already downloaded and currently unused by
+`agents/alpha/factors.py`) before reaching for #3 (absolute momentum with a cash leg) or the PIT-universe
+swap. Not decided here — the operator's call.
