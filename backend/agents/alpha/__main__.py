@@ -77,9 +77,19 @@ def test_no_lookahead_bias(prices, volumes, macro_regime, risk_regime):
     )
 
 
-def test_regime_changes_signals(prices, volumes):
-    """A different macro regime must actually produce different signals —
-    otherwise the regime input is decorative."""
+def test_macro_regime_no_longer_changes_factor_weights(prices, volumes):
+    """Inverted 2026-08-19 (wayfinder ticket 06): factor weights are now FLAT
+    across macro regimes on purpose (see combiner.py's module docstring for
+    why). This test used to assert the opposite; asserting the old behavior
+    now would fail by design, which is itself a useful signal that the
+    intended change actually landed rather than silently reverting.
+
+    Same macro premise, opposite assertion: at identical risk regime (so
+    exposure_scale is held constant), switching MACRO regime must now produce
+    byte-identical signals, because REGIME_FACTOR_WEIGHTS is the same dict for
+    every regime. RISK regime is a separate mechanism (exposure_scale) and is
+    checked separately below — flattening factor weights didn't touch it.
+    """
     combiner = AlphaCombiner()
     growth = combiner.generate(
         prices, volumes, MacroRegime.DISINFLATIONARY_GROWTH, RiskRegime.RISK_ON
@@ -88,18 +98,37 @@ def test_regime_changes_signals(prices, volumes):
 
     growth_map = {s.ticker: s.signal for s in growth.signals}
     stag_map = {s.ticker: s.signal for s in stag.signals}
-    changed = sum(1 for t in growth_map if abs(growth_map[t] - stag_map[t]) > 1e-9)
-    assert changed > 0, "regime had no effect on signals — the regime input is being ignored"
+    changed = {t: (growth_map[t], stag_map[t]) for t in growth_map if abs(growth_map[t] - stag_map[t]) > 1e-9}
+    assert not changed, (
+        f"macro regime still affects signals at flat weights — the flatten did not fully land: {changed}"
+    )
     print(
-        f"Regime-sensitivity test PASSED: switching goldilocks -> stagflation "
-        f"moved {changed}/{len(growth_map)} signals."
+        f"Flat-weight invariance test PASSED: goldilocks and stagflation produce byte-identical "
+        f"signals for all {len(growth_map)} names now that factor weights don't vary by macro regime."
     )
 
-    # Ranking should also reorder, not merely rescale, since the weights differ.
     growth_order = [s.ticker for s in growth.signals]
     stag_order = [s.ticker for s in stag.signals]
-    if growth_order != stag_order:
-        print("  Ranking also reordered (weights genuinely change relative attractiveness).")
+    assert growth_order == stag_order, "ranking order changed despite identical signals — sort instability"
+    print("  Ranking order also identical, as expected.")
+
+
+def test_risk_regime_still_scales_exposure(prices, volumes):
+    """The mechanism flattening didn't touch: RISK regime (not macro regime)
+    still scales gross exposure via RISK_EXPOSURE_SCALE, independent of the
+    now-flat factor weights."""
+    combiner = AlphaCombiner()
+    risk_on = combiner.generate(prices, volumes, MacroRegime.STAGFLATION, RiskRegime.RISK_ON)
+    risk_off = combiner.generate(prices, volumes, MacroRegime.STAGFLATION, RiskRegime.RISK_OFF)
+
+    on_map = {s.ticker: s.signal for s in risk_on.signals}
+    off_map = {s.ticker: s.signal for s in risk_off.signals}
+    changed = sum(1 for t in on_map if abs(on_map[t] - off_map[t]) > 1e-9)
+    assert changed > 0, "risk regime had no effect on exposure — RISK_EXPOSURE_SCALE is being ignored"
+    print(
+        f"Risk-regime exposure test PASSED: risk-on -> risk-off moved {changed}/{len(on_map)} "
+        f"signals via exposure scaling, independent of the (now flat) factor weights."
+    )
 
 
 def test_factor_directions(prices, volumes):
@@ -195,7 +224,8 @@ def main():
 
     test_factor_directions(prices, volumes)
     test_no_lookahead_bias(prices, volumes, macro_regime, risk_regime)
-    test_regime_changes_signals(prices, volumes)
+    test_macro_regime_no_longer_changes_factor_weights(prices, volumes)
+    test_risk_regime_still_scales_exposure(prices, volumes)
 
     print(f"\nRegime weight table covers all {len(REGIME_FACTOR_WEIGHTS)} macro regimes.")
 
