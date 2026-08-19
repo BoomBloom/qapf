@@ -49,14 +49,26 @@ the regime where it bets hardest on momentum, suggesting the hand-set priors may
   risk-adjusted, and profitable net of costs at $1,000. **Five attempts**, with `n_trials` incremented
   honestly; exhausting the budget means the approach failed. Shortened the critical path — ticket 07 no
   longer waits on ticket 03.
+- [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **FAILS, attempt 1 of 5.**
+  DSR 0.9636 (real signal, passes) and profitable net of real IBKR-Lite costs (+95.28%, passes), but loses
+  to plain equal-weight buy-and-hold on BOTH risk-adjusted measures (Sharpe 0.564 vs 0.849; return/max-DD
+  1.536 vs 2.175). The 4-factor combination isn't adding value over the market it picks from — the factor
+  set itself is the binding constraint, not the regime-weighting (ticket 06) or the cost model, both
+  already fixed. 4 attempts remain. First run of this ticket was invalidated by a real cost-model bug
+  (Qlib's generic $5-per-trade minimum vs. IBKR Lite's real $0) — see the ticket for the full diagnosis.
 
 ## Not yet specified
 
 In scope, but not yet sharp enough to ticket. Graduates as the frontier advances.
 
-- **What happens if the strategy cannot clear the bar.** The most likely outcome, honestly. Searching for
-  new alpha is a different effort with a different shape, and cannot be specified until we know *how* it
-  failed — statistically insignificant is a different problem from significant-but-unprofitable-after-costs.
+- **What attempt 2 (of 5) changes.** Ticket 07's attempt 1 failed cleanly: the signal is statistically real
+  (DSR 0.9636) and profitable, but doesn't beat naive buy-and-hold risk-adjusted — a different, more
+  specific problem than "insignificant" or "unprofitable after costs" would have been. Points at the
+  factor set itself as the lever, not costs or regime-weighting (both already ruled out this session).
+  `docs/research/viable-alpha-families.md` has a ranked shortlist (volatility-managed exposure, OHLC
+  range-vol estimators, absolute/time-series momentum with a cash leg, risk-based allocation as benchmark,
+  meta-labelling) not yet read in full or turned into a concrete attempt-2 plan — the next thing to sharpen
+  into a ticket.
 - **How paper-trading results get compared against the backtest.** Needs the paper stage to exist first.
   The interesting question is what divergence between paper and backtest would count as disqualifying
   rather than as noise.
