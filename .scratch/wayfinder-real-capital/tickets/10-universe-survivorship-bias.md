@@ -2,7 +2,7 @@
 
 **Type:** `wayfinder:grilling`
 **Blocked by:** None — can start immediately.
-**Status:** open · unclaimed
+**Status:** CLOSED — grilled and decided, 2026-08-19
 
 ## Question
 
@@ -37,3 +37,25 @@ Changes the cost of the "fix it properly" option from a guess to a number. Origi
 vendored, and delisted-price data costs $9/month via Sharadar. **"Fix it properly" may now be cheaper
 than "accept and document," which was the assumption when this ticket was opened.** Still the operator's
 decision — this is new information for it, not a resolution.
+
+## Resolution (grilled 2026-08-19)
+
+Three decisions, all confirmed against the recommendation:
+
+1. **Fix it properly.** Build the real point-in-time universe using Qlib's already-vendored PIT
+   constituents builder (`reference/qlib/scripts/data_collector/us_index/collector.py`) plus $9/mo
+   Sharadar for delisted-price coverage — not "reduce" (rule-based selection) and not "accept and
+   document." The bias-removal option is now cheap enough that there's no reason to settle for disclosure
+   instead of correction.
+2. **Does not consume a ticket 02 attempt.** Correcting a known data-measurement bias in the input
+   universe is an infrastructure fix, not a new strategy variant — the 5-attempt budget exists to stop
+   p-hacking the strategy (factor weights, signal construction) against a fixed holdout, and this doesn't
+   touch either.
+3. **Sequencing: fix the universe before ticket 07's attempt 2 runs**, not after. Ticket 01 already
+   decided the strategy needs fewer/cheaper names to mechanically fit $1,000 — that redesign and this
+   bias fix both touch "which names are in scope," so bundling them means attempt 2 tests the real
+   strategy change against real data in one pass instead of two.
+
+**Follow-on:** the build work itself (PIT constituents puller + Sharadar wiring) is real engineering, not
+a research question — ticketed separately as **13**, and is now the prerequisite for ticket 07's next
+attempt.

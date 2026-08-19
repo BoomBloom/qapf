@@ -57,6 +57,11 @@ the regime where it bets hardest on momentum, suggesting the hand-set priors may
   `max_daily_loss_pct=0.06`**, set live in `backend/risk/__main__.py`. Halting requires **re-validation
   against ticket 02's bar** before resuming, not just human discretion (feeds ticket 12). Account size
   stays $1,000 — the strategy shrinks to fit it, not the reverse (feeds ticket 07 attempt 2).
+- [10 — Survivorship bias](tickets/10-universe-survivorship-bias.md) — **Fix it properly**, not
+  accept-and-document or reduce: build the real point-in-time universe (Qlib's free PIT builder + $9/mo
+  Sharadar for delisted names). Does NOT consume a ticket 02 attempt (infrastructure fix, not a strategy
+  variant). Must land **before** ticket 07's attempt 2, bundled with ticket 01's fewer/cheaper-names
+  redesign since both touch universe composition. Build work spun out as ticket 13.
 - [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **FAILS, attempt 1 of 5.**
   DSR 0.9636 (real signal, passes) and profitable net of real IBKR-Lite costs (+95.28%, passes), but loses
   to plain equal-weight buy-and-hold on BOTH risk-adjusted measures (Sharpe 0.564 vs 0.849; return/max-DD

@@ -13,14 +13,15 @@ Updated 2026-08-19 after resolving ticket 07 (attempt 1 — FAILED the bar, 4 at
 | 07 | Does the strategy clear the bar? | task | — | **CLOSED — FAILED, attempt 1/5** |
 | 08 | Does it survive costs at $1,000? | task | — | YES (07's attempt-1 already previews this via condition 3, which passed) |
 | 09 | Which broker and platform? | grilling (HITL) | — | YES (04 closed; nautilus_trader + IBKR now real evidence) |
-| 10 | Universe survivorship bias | grilling (HITL) | — | YES (evidence appended: Qlib's free PIT builder) |
+| 10 | Universe survivorship bias | grilling (HITL) | — | **CLOSED — fix it properly, before 07 attempt 2** |
 | 11 | Intraday equity vs daily closes | grilling (HITL) | — | YES |
 | 12 | Wire kill-switch enforcement | task | — | YES |
+| 13 | Build the point-in-time universe | task | — | YES — prerequisite for 07's attempt 2 |
 
-**The critical path has moved.** Ticket 07's attempt 1 is a clean, informative failure: the signal is
-statistically real (DSR 0.9636) and profitable, but doesn't beat naive buy-and-hold risk-adjusted — the
-factor set is the binding constraint, not costs (fixed) or regime-weighting (already flattened, ticket
-06). **Recommended next: turn `docs/research/viable-alpha-families.md`'s shortlist into a concrete
-attempt-2 plan for ticket 07**, in a fresh session per wayfinder's one-ticket-per-session rule.
+**The critical path has moved again.** Ticket 07's attempt 2 is now blocked on ticket 13 (build the real
+point-in-time universe) landing first — ticket 10 decided the current hand-picked universe inflates every
+result and must be fixed, not just disclosed, before spending another attempt. **Recommended next: ticket
+13**, then fold in ticket 01's fewer/cheaper-names constraint and `docs/research/viable-alpha-families.md`'s
+shortlist into one concrete attempt-2 plan.
 
-Tickets 01, 09, 10 and 11 are HITL and need the operator. Tickets 03, 08 and 12 are AFK.
+Tickets 09 and 11 are HITL and need the operator. Tickets 03, 08, 12 and 13 are AFK.
