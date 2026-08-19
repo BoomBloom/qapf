@@ -10,11 +10,16 @@ Needs the __main__ guard because it reaches Agent 9, which touches qlib.
 
 import json
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
 import yfinance as yf
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+TICKETS_DIR = REPO_ROOT / ".scratch" / "wayfinder-real-capital" / "tickets"
+MAP_PATH = REPO_ROOT / ".scratch" / "wayfinder-real-capital" / "MAP.md"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -33,14 +38,14 @@ OUT = Path(__file__).resolve().parents[2] / "frontend" / "data" / "snapshot.json
 # Declared, not inferred — the dashboard should state plainly what is built,
 # what is blocked, and what is deliberately deferred.
 ROSTER = [
-    (1, "Lead Orchestrator", "blocked", "Needs a funded LLM provider"),
+    (1, "Lead Orchestrator", "live", "LangGraph pipeline; one Anthropic call per run for the CIO memo"),
     (2, "Portfolio Manager", "live", "Qlib optimizer + shrinkage covariance"),
     (3, "Academic Research", "live", "arXiv + GitHub ingestion"),
-    (4, "Probability & Statistics", "live", "ADF/KPSS, cointegration, Deflated Sharpe"),
-    (5, "Quantum & Optimization", "deferred", "No measured problem classical methods fail"),
+    (4, "Probability & Statistics", "live", "ADF/KPSS, cointegration, Deflated Sharpe, CUSUM filter"),
+    (5, "Quantum & Optimization", "live", "QAOA subset selection, benchmarked vs. classical every run"),
     (6, "Fundamental & Macro", "live", "Keyless FRED regime classification"),
     (7, "Alpha Mining", "live", "Regime-conditional factor signals"),
-    (8, "Quant Software Engineering", "blocked", "Needs a funded LLM provider"),
+    (8, "Quant Software Engineering", "live", "Code-gen, self-verified against a real test before acceptance"),
     (9, "Backtesting & Validation", "live", "Walk-forward on Qlib's engine"),
     (10, "Chief Risk Officer", "live", "VaR/CVaR + kill switch, isolation enforced"),
     (11, "Execution & Microstructure", "live", "TWAP/VWAP + square-root impact"),
@@ -48,8 +53,51 @@ ROSTER = [
     (13, "Compliance & Surveillance", "live", "Conduct rules + audit trail"),
     (14, "Model Risk & Validation", "live", "Independently challenges Agent 9"),
     (15, "Data Infrastructure", "live", "Feed staleness, gaps, schema drift"),
-    (16, "Treasury & Funding", "deferred", "No margin or multi-currency exposure yet"),
+    (16, "Treasury & Funding", "live", "Cash yield + Reg T margin; no FX exposure to hedge yet"),
 ]
+
+_TICKET_TITLE_RE = re.compile(r"^#\s*(\d+)\s*—\s*(.+)$", re.MULTILINE)
+_TICKET_STATUS_RE = re.compile(r"^\*\*Status:\*\*\s*(.+)$", re.MULTILINE)
+_TICKET_TYPE_RE = re.compile(r"^\*\*Type:\*\*\s*`?([^`\n]+)`?", re.MULTILINE)
+
+
+def read_wayfinder_status() -> dict:
+    """Parses the real ticket files rather than hand-summarizing them here —
+    this section goes stale the moment a ticket closes if it's re-typed by
+    hand, so it's derived straight from the same files the wayfinder process
+    itself updates."""
+    destination = ""
+    if MAP_PATH.exists():
+        map_text = MAP_PATH.read_text()
+        m = re.search(r"## Destination\s*\n+(.+?)\n\n", map_text, re.DOTALL)
+        if m:
+            destination = m.group(1).strip()
+
+    tickets = []
+    if TICKETS_DIR.exists():
+        for f in sorted(TICKETS_DIR.glob("*.md")):
+            text = f.read_text()
+            title_m = _TICKET_TITLE_RE.search(text)
+            status_m = _TICKET_STATUS_RE.search(text)
+            type_m = _TICKET_TYPE_RE.search(text)
+            if not title_m:
+                continue
+            status_raw = status_m.group(1).strip() if status_m else "unknown"
+            closed = status_raw.upper().startswith("CLOSED") or "DONE" in status_raw.upper()
+            tickets.append({
+                "n": int(title_m.group(1)),
+                "title": title_m.group(2).strip(),
+                "type": type_m.group(1).strip() if type_m else "",
+                "status": status_raw,
+                "closed": closed,
+            })
+    tickets.sort(key=lambda t: t["n"])
+    return {
+        "destination": destination,
+        "tickets": tickets,
+        "closed_count": sum(1 for t in tickets if t["closed"]),
+        "total_count": len(tickets),
+    }
 
 
 def build_snapshot() -> dict:
@@ -65,7 +113,11 @@ def build_snapshot() -> dict:
     from agents.modelrisk.validator import ModelRiskValidator
     from agents.operations.reconciler import OperationsReconciler
     from agents.portfolio.allocator import PortfolioAllocator
+    from agents.quantum.optimizer import QuantumPortfolioOptimizer
+    from agents.treasury.manager import TreasuryManager
     from risk.metrics import historical_cvar, historical_var, max_drawdown, parametric_var
+    from risk.monitor import RiskMonitor
+    from risk.schemas import RiskLimits
 
     logger.info("Downloading market data...")
     data = yf.download(UNIVERSE, period="3y", interval="1d", progress=False, auto_adjust=True)
@@ -108,6 +160,25 @@ def build_snapshot() -> dict:
     compliance = ComplianceSurveillance().review(
         orders_df, targets, sectors=SECTORS, as_of=alloc.as_of)
 
+    # --- Agent 5: quantum subset selection (kept small -- see optimizer.py's
+    # module docstring on why QAOA doesn't scale past a modest qubit count) ---
+    logger.info("Agent 5: quantum subset selection")
+    covariance = PortfolioAllocator().estimate_covariance(prices, UNIVERSE)
+    signal_map = {s.ticker: s.signal for s in bundle.signals}
+    quantum_result = QuantumPortfolioOptimizer(max_candidates=6, reps=1, maxiter=50).select_subset(
+        signal_map, covariance, k=3, risk_aversion=0.5,
+    )
+
+    # --- Agent 16: treasury (cash yield + margin infra, both at the real
+    # $1,000 stage-3 size and at this dashboard's $1M illustrative size) ---
+    logger.info("Agent 16: treasury")
+    treasury = TreasuryManager()
+    cash_yield_1k = treasury.assess_cash_yield(nav=1_000, cash_balance=alloc.cash_weight * 1_000)
+    cash_yield_full = treasury.assess_cash_yield(
+        nav=PORTFOLIO_VALUE, cash_balance=alloc.cash_weight * PORTFOLIO_VALUE)
+    margin = treasury.assess_margin_requirement(
+        gross_position_value=alloc.gross_exposure * PORTFOLIO_VALUE, nav=PORTFOLIO_VALUE)
+
     # --- Agent 9 + 14 + 10: backtest, model risk, risk metrics ----------
     logger.info("Agent 9: walk-forward backtest (this is the slow step)")
     qlib.init(provider_uri="~/.qlib/qlib_data/us_data", region="us")
@@ -122,6 +193,9 @@ def build_snapshot() -> dict:
 
     logger.info("Agent 10: risk metrics")
     equity = (1 + daily_returns).cumprod()
+    # Real limits from wayfinder ticket 01 (2026-08-19) -- same values as
+    # backend/risk/__main__.py and backend/core/state_graph.py's LIVE_RISK_LIMITS.
+    risk_assessment = RiskMonitor(RiskLimits(max_drawdown_pct=0.20, max_daily_loss_pct=0.06)).assess(daily_returns)
 
     # --- Agent 15: data health ------------------------------------------
     logger.info("Agent 15: data health")
@@ -144,6 +218,49 @@ def build_snapshot() -> dict:
         "roster": [
             {"n": n, "name": name, "status": st, "note": note} for n, name, st, note in ROSTER
         ],
+        "wayfinder": read_wayfinder_status(),
+        "orchestrator": {
+            "description": "LangGraph pipeline (macro -> alpha -> portfolio -> risk_gate -> "
+                            "[execution -> compliance] -> cio_synthesis). Not run automatically on "
+                            "every dashboard export -- its final node makes one real, paid Anthropic "
+                            "call per invocation, and the cost-discipline decision behind this project "
+                            "means that shouldn't happen just to refresh a snapshot.",
+            "run_command": "cd backend && python -m core",
+        },
+        "codegen": {
+            "description": "Generates and self-verifies Python from a spec (Groq-tier, escalates to "
+                            "Anthropic only after 2 failed attempts). Demonstrated capability: the "
+                            "symmetric CUSUM filter, generated and verified on the first attempt, now "
+                            "live in agents.stats.toolkit.cusum_filter().",
+            "run_command": "cd backend && python -m agents.codegen",
+        },
+        "quantum": {
+            "universe": quantum_result.universe,
+            "k": quantum_result.k,
+            "brute_force_selected": quantum_result.brute_force.selected,
+            "qaoa_selected": quantum_result.qaoa.selected,
+            "qaoa_matches_optimum": quantum_result.qaoa_matches_brute_force,
+            "qaoa_seconds": quantum_result.qaoa.wall_clock_seconds,
+            "brute_force_seconds": quantum_result.brute_force.wall_clock_seconds,
+            "reasoning": quantum_result.reasoning,
+        },
+        "treasury": {
+            "cash_yield_at_1k": {
+                "nav": cash_yield_1k.nav, "annual_interest": cash_yield_1k.annual_interest,
+                "effective_apy": cash_yield_1k.effective_apy, "reasoning": cash_yield_1k.reasoning,
+            },
+            "cash_yield_at_portfolio_value": {
+                "nav": cash_yield_full.nav, "annual_interest": cash_yield_full.annual_interest,
+                "effective_apy": cash_yield_full.effective_apy,
+            },
+            "margin": {
+                "gross_position_value": margin.gross_position_value,
+                "initial_margin_required": margin.initial_margin_required,
+                "maintenance_margin_required": margin.maintenance_margin_required,
+                "margin_call": margin.margin_call,
+                "reasoning": margin.reasoning,
+            },
+        },
         "macro": {
             "as_of": assessment.as_of,
             "regime": assessment.regime.value,
@@ -233,8 +350,12 @@ def build_snapshot() -> dict:
             "historical_cvar": historical_cvar(daily_returns),
             "parametric_var": parametric_var(daily_returns),
             "max_drawdown": max_drawdown(daily_returns),
-            "kill_switch_armed": False,
-            "limits_set": False,
+            "kill_switch_armed": True,
+            "limits_set": True,
+            "max_drawdown_pct": 0.20,
+            "max_daily_loss_pct": 0.06,
+            "current_assessment": risk_assessment.kill_switch_triggered,
+            "breaches": risk_assessment.breaches,
         },
         "modelrisk": {
             "verdict": mr.verdict,
@@ -276,6 +397,9 @@ def main():
     print(f"\nWrote {OUT} ({OUT.stat().st_size:,} bytes)")
     print(f"  regime={snapshot['macro']['regime']}  positions={len(snapshot['portfolio']['positions'])}"
           f"  backtest={snapshot['backtest']['total_return']:+.2%}")
+    print(f"  wayfinder: {snapshot['wayfinder']['closed_count']}/{snapshot['wayfinder']['total_count']} tickets closed"
+          f"  quantum_matches_optimum={snapshot['quantum']['qaoa_matches_optimum']}"
+          f"  cash_yield_at_1k=${snapshot['treasury']['cash_yield_at_1k']['annual_interest']:.2f}/yr")
 
 
 if __name__ == "__main__":
