@@ -116,11 +116,22 @@ class WalkForwardBacktester:
         n_drop: int = 2,
         account: float = 1_000_000,
         n_trials: int = 4,
+        exchange_kwargs: dict | None = None,
     ) -> tuple[BacktestReport, pd.Series]:
         """`n_trials=4` reflects the 4 hand-set factors Agent 7 combines; it is
         a stated assumption, not a measured count of strategies actually
         tried, and is surfaced in the report rather than hidden inside a
         single opaque Sharpe number.
+
+        `exchange_kwargs` defaults to this module's `EXCHANGE_KWARGS` (Qlib's
+        generic cost assumptions, including a flat $5-per-trade `min_cost`).
+        That default is fine at the $1M scale Agent 9's own demo runs at, but
+        it is a broker-assumption artifact, not a strategy property: at a
+        real small-account size with frequent rebalancing, a flat per-trade
+        minimum can consume most of the account in commissions alone before
+        the strategy itself has been fairly tested. Callers validating at a
+        specific real account size should pass the ACTUAL target broker's
+        cost structure here rather than trust the generic default silently.
 
         Returns `(report, daily_returns)` -- the report is the summary, but
         the raw daily-returns series is real signal other agents need too
@@ -128,6 +139,7 @@ class WalkForwardBacktester:
         14's Model Risk will want the same series). Returning it here avoids
         every future consumer re-deriving it by duplicating this method's
         Qlib wiring."""
+        exchange_kwargs = exchange_kwargs or EXCHANGE_KWARGS
         test_start_ts, test_end_ts = pd.Timestamp(test_start), pd.Timestamp(test_end)
 
         candidate_dates = pd.date_range(test_start_ts, test_end_ts, freq=rebalance_freq)
@@ -172,7 +184,7 @@ class WalkForwardBacktester:
             executor=qlib_executor.SimulatorExecutor(time_per_step="day", generate_portfolio_metrics=True),
             account=account,
             benchmark=benchmark_returns,
-            exchange_kwargs=EXCHANGE_KWARGS,
+            exchange_kwargs=exchange_kwargs,
         )
         report_df, _positions = report_dict["1day"]
 

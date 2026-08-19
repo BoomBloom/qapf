@@ -42,6 +42,27 @@ TEST_END = "2017-12-31"
 ACCOUNT = 1_000  # the actual target account size, not $1M
 ATTEMPT_N_TRIALS = 1  # first-ever look at this window
 
+# IBKR Lite's REAL commission structure (verified via web search 2026-08-19,
+# interactivebrokers.com/compare-lite-pro): $0 commission on US stock trades,
+# no account minimum. Qlib's own EXCHANGE_KWARGS default (min_cost=5, a flat
+# $5-per-trade minimum) is what actually killed the first run of this ticket --
+# with monthly rebalancing across ~7 position changes over 121 months, that
+# flat minimum alone consumed 85% of a $1,000 account before the strategy got
+# too poor to trade at all. That is a broker-assumption artifact, not a
+# strategy failure, and not what the operator's actual target broker charges.
+#
+# The percentage-based open_cost/close_cost (spread proxy) are NOT the
+# problem -- they scale with trade size and stayed unchanged. Only min_cost
+# is corrected, from Qlib's generic default to IBKR Lite's verified $0.
+IBKR_LITE_EXCHANGE_KWARGS = {
+    "freq": "day",
+    "limit_threshold": 0.095,
+    "deal_price": "close",
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "min_cost": 0,  # IBKR Lite: $0 flat commission, verified -- was 5 (Qlib's generic default)
+}
+
 
 def _sharpe(returns: pd.Series, trading_days: int = 252) -> float:
     r = returns.dropna()
@@ -79,6 +100,7 @@ def main():
     report, daily_returns = bt.run(
         prices, volumes, test_start=TEST_START, test_end=TEST_END,
         account=ACCOUNT, n_trials=ATTEMPT_N_TRIALS,
+        exchange_kwargs=IBKR_LITE_EXCHANGE_KWARGS,
     )
 
     # Benchmark's own Sharpe and max drawdown -- never computed in the 2018-2020
