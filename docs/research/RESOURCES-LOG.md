@@ -21,9 +21,9 @@ arrives or a status changes — don't let it drift out of sync with reality.
 
 | Resource | Status | Verdict |
 |---|---|---|
-| Kakushadze & Serur, "151 Estrategias de Trading" (arXiv 1912.04492) | 💥 | Fed into the "viable alpha families" research agent — **that agent failed on session limit before producing findings.** Not yet actually used. |
+| Kakushadze & Serur, "151 Estrategias de Trading" (arXiv 1912.04492) | ⏳ | Re-dispatched 2026-08-19 (2nd attempt) — running in background. |
 | *Machine Learning for Algorithmic Trading* (Jansen) | 💥 | Same prompt, same failure. Not yet checked. |
-| *Systematic Trading* (Carver) | 💥 | Fed into both the alpha-families AND position-sizing prompts — **both failed.** Not yet checked. |
+| *Systematic Trading* (Carver) | ⏳ | Re-dispatched 2026-08-19 (2nd attempt, both prompts) — running in background. |
 | *Trading Systems and Methods* (Kaufman) | 💥 | Same as above, not yet checked. |
 | *Advances in Financial Machine Learning* (López de Prado) | 💥 | Fed into alpha-families prompt — failed. Not yet checked (Agent 4 already implements his/Bailey's Deflated Sharpe Ratio independently, from prior knowledge, not this book). |
 | *The Leverage Space Trading Model* (Vince) | 💥 | Fed into position-sizing prompt — failed. Not yet checked. |
