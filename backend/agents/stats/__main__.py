@@ -8,9 +8,32 @@ actually find for the current window rather than asserting an outcome.
 """
 
 import numpy as np
+import pandas as pd
 import yfinance as yf
 
 from .toolkit import ProbabilityStatisticsToolkit
+
+
+def test_cusum_filter(toolkit: ProbabilityStatisticsToolkit):
+    """Same hand-traced case Agent 8 verified before this method was accepted
+    into the toolkit (backend/agents/codegen/__main__.py) -- re-asserted here
+    so a future edit to this method can't silently break it without this
+    module's own test suite catching it."""
+    dates = pd.bdate_range("2024-01-02", periods=11)
+    returns = pd.Series(
+        [0.01, 0.01, 0.01, -0.005, 0.01, 0.01, 0.01, 0.01, -0.02, -0.02, -0.02],
+        index=dates,
+    )
+    events = toolkit.cusum_filter(returns, threshold=0.025)
+    expected = [dates[2], dates[6], dates[9]]
+    assert [pd.Timestamp(e) for e in events] == list(expected), (
+        f"CUSUM filter mismatch: got {events}, expected {expected}"
+    )
+
+    flat = pd.Series([0.0] * 10, index=pd.bdate_range("2024-01-02", periods=10))
+    assert toolkit.cusum_filter(flat, 0.01) == [], "a flat series must never trigger an event"
+
+    print("CUSUM filter test PASSED: hand-traced 3-event case and flat-series null case both match.")
 
 
 def main():
@@ -52,6 +75,9 @@ def main():
         "-- more multiple-testing should make the same result LESS convincing."
     )
     print("\nSanity check passed: DSR correctly decreases as n_trials increases.")
+
+    print("\n=== CUSUM filter (event-based sampling) ===")
+    test_cusum_filter(toolkit)
 
 
 if __name__ == "__main__":

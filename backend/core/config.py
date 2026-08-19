@@ -19,12 +19,13 @@ dotenv call needed here.
 import tradingagents  # noqa: F401  (import side effect: loads .env via find_dotenv)
 from tradingagents.llm_clients import create_llm_client
 
-# Any Groq-hosted model works here (Groq is matched as an OpenAI-compatible
-# provider in tradingagents' factory — see llm_clients/openai_client.py's
-# PROVIDER_SPECS). Not pinned against a live catalog entry (Groq's own catalog
-# entry is CUSTOM_ONLY in tradingagents/llm_clients/model_catalog.py) --
-# verified against a real call in backend/core/__main__.py, not assumed.
-QUICK_MODEL = "llama-3.3-70b-versatile"
+# Verified live 2026-08-19 against Groq's actual /v1/models endpoint --
+# llama-3.3-70b-versatile (the obvious guess) came back 404, decommissioned.
+# openai/gpt-oss-120b was confirmed present in that same live listing and is
+# Groq's largest general-purpose open-weight model, a reasonable
+# quick-thinking default for code generation (Agent 8) specifically. Re-check
+# the live model list if this ever 404s again -- Groq's catalog turns over.
+QUICK_MODEL = "openai/gpt-oss-120b"
 
 # claude-sonnet-5: "near-frontier intelligence at Sonnet cost" per
 # tradingagents' own model catalog description -- the cheapest Anthropic tier

@@ -25,7 +25,7 @@ arrives or a status changes — don't let it drift out of sync with reality.
 | *Machine Learning for Algorithmic Trading* (Jansen) | 💥 | Same prompt, same failure. Not yet checked. |
 | *Systematic Trading* (Carver) | ⏳ | Re-dispatched 2026-08-19 (2nd attempt, both prompts) — running in background. |
 | *Trading Systems and Methods* (Kaufman) | 💥 | Same as above, not yet checked. |
-| *Advances in Financial Machine Learning* (López de Prado) | 💥 | Fed into alpha-families prompt — failed. Not yet checked (Agent 4 already implements his/Bailey's Deflated Sharpe Ratio independently, from prior knowledge, not this book). |
+| *Advances in Financial Machine Learning* (López de Prado) | ✅ (partial) | Research-agent dispatch still never completed, but its most commonly-cited technique — the symmetric CUSUM filter (event-based sampling, ch. 2.5.2.1) — is now actually built: `ProbabilityStatisticsToolkit.cusum_filter()` in `backend/agents/stats/toolkit.py`, generated and independently verified by Agent 8 (code-gen), 2026-08-19. Triple-barrier labeling and meta-labeling (the book's other headline techniques) remain unapplied. |
 | *The Leverage Space Trading Model* (Vince) | 💥 | Fed into position-sizing prompt — failed. Not yet checked. |
 | *The Mathematics of Money Management* (Vince) | 💥 | Same as above. |
 | *Algorithmic Short Selling with Python* (Bernut) | 💥 | Fed into alpha-families prompt — failed. Relevant given the book is long-only. |
