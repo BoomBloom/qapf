@@ -139,7 +139,17 @@ class WalkForwardBacktester:
         # Fetch each FRED series once; every rebalance's assess() call slices
         # this same cache rather than re-hitting FRED (~7 series x N rebalances
         # of redundant network calls otherwise).
-        macro_series_cache = self.macro.fetch_all_series()
+        #
+        # start_date is derived from test_start, NOT fetch_all_series()'s own
+        # 2015-01-01 default. That default silently has zero observations
+        # before 2015, so any test_start earlier than that (e.g. the 2008-2017
+        # validation window) previously failed with "No macro series could be
+        # fetched" -- correct-looking code, silently wrong for a valid input
+        # it had never been run against. A 3-year buffer covers regime.py's
+        # YoY calculations comfortably without hardcoding an arbitrary early
+        # constant.
+        macro_start = str((test_start_ts - pd.DateOffset(years=3)).date())
+        macro_series_cache = self.macro.fetch_all_series(start_date=macro_start)
 
         signal, rebalance_log = self.build_signal_series(
             prices, volumes, rebalance_dates, test_start_ts, test_end_ts, macro_series_cache

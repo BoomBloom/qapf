@@ -3,7 +3,7 @@
 **Type:** `wayfinder:task`
 **Blocked by:** NOTHING — 02, 05 and 06 are all closed. **This is now the frontier ticket, and the one
 where the map's destination is reached or not.**
-**Status:** open · unclaimed
+**Status:** open · CLAIMED (this session, 2026-08-19)
 
 ## Question
 
