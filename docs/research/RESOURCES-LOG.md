@@ -75,3 +75,19 @@ resets. Both were fully specified and ready; they simply never ran to completion
    priority (after ticket 07's result is known).
 3. nautilus_trader is now a real input to ticket 09 (broker/platform) — surface it when that ticket is
    worked, don't let it sit only in this log.
+
+## Batch 4 — general-purpose OSS tool lists (2026-08-19)
+
+Two "top 10" lists (SaaS-replacement tools; AI-agent tooling stack). All are well-known, legitimate
+projects — the question here was relevance to QAPF, not whether they're real, so these were triaged by
+judgment against open tickets/architecture rather than individually verified via API.
+
+| Resource | Status | Verdict |
+|---|---|---|
+| Supabase | ⏳ | Genuinely relevant when Phase 1 starts — `CLAUDE.md` already names Postgres/Redis as not-yet-built target infra. Could shortcut it (hosted Postgres + realtime for a live dashboard vs. the current static JSON snapshot). Not actionable until Phase 1 begins. |
+| Coolify | ⏳ | Fits the project's local-first framing for eventual self-hosted deployment. Not actionable — the FastAPI/Next.js surface it would deploy doesn't exist yet. |
+| LocalAI | ⏳ | Real candidate for eliminating the ~$0.68/decision LLM cost (ticket 02) for Agents 1/8. Needs an actual quality check before trusting — local models are meaningfully weaker at TradingAgents' tool-calling/debate reasoning than what's currently verified working. Flag for whoever picks up ticket 10/11. |
+| CrewAI | ❌ | Multi-agent orchestration — directly contradicts README's already-verified decision to fork TradingAgents' LangGraph rather than "invent a second orchestration mechanism." Not a "didn't know about it," a considered rejection. |
+| AutoGen | ❌ | Same as CrewAI, same reason. |
+| Documenso, Cal.com, PostHog, Penpot, NocoDB, Excalidraw, n8n, Immich | 🔍 | No open ticket or architecture gap any of these solve. Not deep-checked — judged not relevant by category (e-signature, scheduling, product analytics, design tool, spreadsheet-DB, diagramming, workflow automation, photo management — none map to a single-operator quant trading system). |
+| Browser Use, Firecrawl, Mem0, Langflow, Crawl4AI, RAGFlow, AnythingLLM | 🔍 | Same treatment. Firecrawl/Crawl4AI have marginal future relevance if Agent 3 (Research) ever needs to scrape non-API sources (SEC filings, news without an API) — noted, not actionable now. |
