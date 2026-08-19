@@ -91,3 +91,12 @@ judgment against open tickets/architecture rather than individually verified via
 | AutoGen | ❌ | Same as CrewAI, same reason. |
 | Documenso, Cal.com, PostHog, Penpot, NocoDB, Excalidraw, n8n, Immich | 🔍 | No open ticket or architecture gap any of these solve. Not deep-checked — judged not relevant by category (e-signature, scheduling, product analytics, design tool, spreadsheet-DB, diagramming, workflow automation, photo management — none map to a single-operator quant trading system). |
 | Browser Use, Firecrawl, Mem0, Langflow, Crawl4AI, RAGFlow, AnythingLLM | 🔍 | Same treatment. Firecrawl/Crawl4AI have marginal future relevance if Agent 3 (Research) ever needs to scrape non-API sources (SEC filings, news without an API) — noted, not actionable now. |
+
+## Batch 5 — self-discovered while resolving ticket 13 (2026-08-19)
+
+Not sent by the operator — surfaced while building the point-in-time universe fix, logged per the
+standing instruction to track every resource, not just operator-provided ones.
+
+| Resource | Status | Verdict |
+|---|---|---|
+| fja05680/sp500 (GitHub) | 🔍 | Verified real (913 stars, MIT, pushed 2026-07-13). Ships ready-made `sp500_ticker_start_end.csv` — historical S&P 500 membership since 1996, no scraping required. **Not adopted this session** (the Wikipedia-historical-revision fix in `build_pit_universe.py` was already built and verified working by the time this was found), but a spot-check confirms its data (e.g. WB removed 2009-01-02, close to my build's 2008-12-30) is consistent and current. **Recommended as the actual long-term source** if the PIT universe needs refreshing later — my fix is pinned to a single frozen 2024-05-23 Wikipedia revision and will not capture any membership changes after that date, while this repo appears actively maintained. |

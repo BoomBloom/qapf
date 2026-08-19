@@ -61,7 +61,11 @@ the regime where it bets hardest on momentum, suggesting the hand-set priors may
   accept-and-document or reduce: build the real point-in-time universe (Qlib's free PIT builder + $9/mo
   Sharadar for delisted names). Does NOT consume a ticket 02 attempt (infrastructure fix, not a strategy
   variant). Must land **before** ticket 07's attempt 2, bundled with ticket 01's fewer/cheaper-names
-  redesign since both touch universe composition. Build work spun out as ticket 13.
+  redesign since both touch universe composition. Build work spun out as ticket 13, **half done**: real
+  point-in-time S&P 500 membership built and verified for free (Lehman Brothers/Fannie Mae/Freddie
+  Mac/Wachovia's actual 2008 removals correctly captured — the vendored builder was actually broken
+  against the live Wikipedia page, fixed by reading a historical revision instead). Delisted PRICE data
+  still needs the operator to personally sign up for Sharadar ($9/mo) — cannot be done on their behalf.
 - [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **FAILS, attempt 1 of 5.**
   DSR 0.9636 (real signal, passes) and profitable net of real IBKR-Lite costs (+95.28%, passes), but loses
   to plain equal-weight buy-and-hold on BOTH risk-adjusted measures (Sharpe 0.564 vs 0.849; return/max-DD
