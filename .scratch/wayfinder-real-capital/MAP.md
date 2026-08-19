@@ -66,6 +66,10 @@ In scope, but not yet sharp enough to ticket. Graduates as the frontier advances
   for a regime-conditional strategy — it sees each regime only once. Sharpens once ticket 03 establishes
   what data is actually obtainable.
 - **Tax and reporting treatment** of systematic trading in the operator's jurisdiction.
+- **Whether the FX ambition should become the funded route.** Ticket 04 showed prop funding fits FX/futures
+  on MT5 and not cash equities. That makes the second map (FX/gold) the one that could actually be funded,
+  which may change its priority relative to this one. Not sharp enough to ticket until this map's
+  destination is reached.
 
 ## Out of scope
 
