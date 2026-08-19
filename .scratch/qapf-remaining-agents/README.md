@@ -13,7 +13,7 @@ A ticket is grabbable when every ticket it's blocked by is done.
 | # | Ticket | Blocked by | Grabbable now? |
 |---|--------|-----------|----------------|
 | 01 | Resolve agent-node interface drift (prefactor) | — | **yes** |
-| 02 | Verify TradingAgents orchestration with an LLM key | — (needs a human to supply a key) | **yes, if a key is provided** |
+| 02 | Verify TradingAgents orchestration with an LLM key | — | **DONE (2026-08-19)** — ~$0.68/decision |
 | 03 | Agent 15 — Data Infrastructure & Reliability | — | **DONE (2026-08-19)** |
 | 04 | Agent 14 — Model Risk & Independent Validation | — | **DONE (2026-08-19)** |
 | 05 | Agent 2 — Portfolio Manager, core allocation | — | **DONE (2026-08-19)** |
@@ -51,6 +51,6 @@ they change what's actually workable:
 ## Already built (not ticketed)
 
 12 of 16 agents are built: 2 (portfolio), 3 (research), 4 (stats), 6 (macro), 7 (alpha), 9 (backtest),
-10 (CRO), 11 (execution), 12 (operations), 13 (compliance), 14 (model risk), 15 (data infra). They are and verified
-against live data. See `CLAUDE.md`'s architecture map for what's built vs. deliberately deferred inside
+10 (CRO), 11 (execution), 12 (operations), 13 (compliance), 14 (model risk), 15 (data infra). All are
+verified against live data. See `CLAUDE.md`'s architecture map for what's built vs. deliberately deferred inside
 each.

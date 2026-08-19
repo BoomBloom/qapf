@@ -98,3 +98,47 @@ is a fixed quota rather than variable load, so a paid tier removes it determinis
 
 Everything non-LLM. Agents 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15 need no LLM at all. Only Agent 8
 (code generation) and Agent 1 (which forks TradingAgents' LLM graph) genuinely require this.
+
+
+## RESOLVED (2026-08-19): the graph runs, and one decision costs ~$0.68
+
+A funded Anthropic key was supplied and the full graph completed end to end on AAPL.
+
+| Measure | Value |
+|---|---|
+| Wall clock | 516.4s (~8.6 min) |
+| LLM calls | 16 |
+| Tokens | 113,320 in / 22,459 out (135,779 total) |
+| **Cost per decision** | **~$0.68** (claude-sonnet-4-6 pricing) |
+| Output | "Underweight" AAPL, with a resolved bull/bear debate |
+
+The whole node chain ran: market + news analysts -> bull/bear debate -> research manager -> trader ->
+risk debate -> portfolio manager, ending in a specific recommendation with a stated rationale and price
+levels.
+
+### The judgement this ticket asked for
+
+**Is that cost acceptable?** It depends entirely on universe size, not portfolio value — which is the
+non-obvious part:
+
+- One ticker daily: ~$0.68/day, ~$250/year. Comfortably affordable.
+- The 15-name universe daily: ~$10/day, ~$3,700/year. Real money but not prohibitive.
+- Intraday, or a universe in the hundreds: prohibitive without restructuring.
+
+So the architecture is viable for daily decisions on a small universe, and the cost scales with how many
+instruments are analysed rather than how much capital is deployed. That asymmetry is worth remembering
+before widening the universe.
+
+### Note on the earlier free-tier finding
+
+The free-tier analysis above stands as the record of why this was blocked for so long: four providers, all
+authenticating, all structurally incapable of one run. 16 calls at ~8.5K tokens each is simply outside
+what free tiers allow. That is a property of the multi-agent debate design, not of any one provider.
+
+- [x] An API key is configured in a way that is gitignored and never committed.
+- [x] `reference/TradingAgents` runs its graph end to end on at least one ticker without erroring.
+- [x] Measured and written down: tokens consumed and wall-clock time for one complete decision.
+- [x] A judgement is recorded on whether that per-decision cost is acceptable at the intended run
+      frequency.
+- [x] Surprises noted: the graph needed no code changes to run on Anthropic, but `ANTHROPIC_BASE_URL` set
+      by the surrounding tooling must be unset or the client is misrouted.
