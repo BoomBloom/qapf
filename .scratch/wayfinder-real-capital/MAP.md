@@ -43,7 +43,12 @@ the regime where it bets hardest on momentum, suggesting the hand-set priors may
 
 <!-- index of closed tickets: one line each, gist + link. Empty at charting. -->
 
-_None yet — the map was charted 2026-08-19 and no ticket has been resolved._
+- [02 — What must the strategy prove before real money?](tickets/02-validation-bar.md) — **2008-2017**
+  is the validation window (untouched, includes the GFC); post-2020 reserved as a one-look final holdout.
+  The bar is **three conditions, all required**: DSR > 0.95, beats equal-weight buy-and-hold
+  risk-adjusted, and profitable net of costs at $1,000. **Five attempts**, with `n_trials` incremented
+  honestly; exhausting the budget means the approach failed. Shortened the critical path — ticket 07 no
+  longer waits on ticket 03.
 
 ## Not yet specified
 

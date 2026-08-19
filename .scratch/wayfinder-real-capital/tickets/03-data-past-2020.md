@@ -24,3 +24,13 @@ replace that engine.
 Investigate: Qlib's own data-collector scripts for building a fresh bundle from Yahoo; commercial
 point-in-time vendors and their cost; whether survivorship bias in free sources is severe enough to
 invalidate results. Record what each option actually costs in money and effort.
+
+### Reframed by ticket 02's resolution (2026-08-19)
+
+**No longer on the critical path.** Ticket 02 established that 2008-2017 is an untouched validation
+window available in the existing bundle, so validation can proceed today without this.
+
+This ticket now serves the **final holdout** — the window looked at exactly once, after the strategy has
+already cleared the bar on 2008-2017. That raises the standard for the data: it must be point-in-time
+correct, because a final holdout contaminated by survivorship or restatement bias is worse than no
+holdout at all (it manufactures false confidence at the exact moment capital is committed).
