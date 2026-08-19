@@ -2,7 +2,7 @@
 
 **Type:** `wayfinder:grilling`
 **Blocked by:** None — ticket 05 CLOSED 2026-08-19. **This ticket is now takeable.**
-**Status:** open · unclaimed
+**Status:** CLOSED 2026-08-19 · resolved with the operator
 
 ## Question
 
@@ -42,3 +42,46 @@ So the live options are now:
 
 Note the interaction with ticket 02's five-attempt budget: each of these is a variant, and trying more
 than one counts as more than one attempt.
+
+---
+
+## Resolution (2026-08-19): FLATTEN to equal weight
+
+Chosen over inverting and over re-instrumenting, as **attempt 1 of the 5-attempt budget** set in ticket 02.
+
+### Why flatten rather than re-instrument first
+
+Re-instrumenting (momentum on Daniel & Moskowitz's `bear x ex-ante-variance`, reversal on VIX) is the
+better-evidenced end state, but it is the wrong FIRST move. It adds machinery, so a failure would be
+ambiguous — weak factors, or a wrong instrument? Flattening is diagnostic in both directions:
+
+- **If flat equal-weight factors clear the bar**, regime conditioning was never needed. One attempt, and
+  a large finding.
+- **If they fail**, the problem is the factors themselves, not the conditioning — which is exactly what
+  you need to know before spending attempt 2 on a more elaborate conditioner.
+
+Sequencing chosen so each attempt is diagnostic rather than just another roll.
+
+### What changes in the code
+
+`REGIME_FACTOR_WEIGHTS` in `backend/agents/alpha/combiner.py` becomes 0.25 for each of the four factors,
+identical across all four macro regimes.
+
+**Keep the mechanism, flatten the values.** Deleting the regime-weight table would make the
+re-instrument option (attempt 2, if warranted) expensive to reach; keeping a table whose rows are all
+identical is honest as long as a comment says why. Agent 7's `__main__.py` regime-sensitivity test
+asserts that switching regimes changes signals — that test must be **inverted** to assert regimes no
+longer change factor weighting, or it will fail by design.
+
+### Architectural consequence, stated plainly
+
+**Agent 6's regime output stops driving Agent 7's factor weights.** It still drives Agent 2 (optimizer
+choice and gross exposure), so Agent 6 is not disconnected — but its role in the alpha layer becomes
+informational. Anyone reading the architecture should not be told the alpha signal is regime-conditional,
+because after this change it is not.
+
+### What would reopen this
+
+Attempt 2 re-instruments on market state rather than macro quadrants — but only if flat factors show
+promise and fall short. If flat factors fail outright, the honest next step is questioning the factors,
+not the conditioner.
