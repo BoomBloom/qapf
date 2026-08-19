@@ -81,14 +81,27 @@ backend/agents/codegen/   BUILT & verified live (2026-08-19) — Agent 8. Groq-t
                           CUSUM filter (López de Prado, AFML), verified against an independently
                           hand-traced case, then landed for real in agents.stats.toolkit.cusum_filter().
                           Run: `python -m agents.codegen`.
-backend/agents/           Agents 5 and 16 deferred by policy
+backend/agents/quantum/   BUILT & verified live (2026-08-19) — Agent 5. Cardinality-constrained subset
+                          selection (which k of n names, NOT Agent 2's continuous weights) via QAOA,
+                          checked against two independent classical references every run: brute-force
+                          enumeration (ground truth) and NumPyMinimumEigensolver (exact QUBO ground
+                          state). Confirms README's own "Scope warning": QAOA found the right answer but
+                          took ~13,000x longer than brute force on a 6-name problem trivial for classical
+                          solvers — a research curiosity, not something QAPF's real allocation uses.
+                          Run: `python -m agents.quantum`.
+backend/agents/treasury/ BUILT & verified live (2026-08-19) — Agent 16. Real cash-yield calculator
+                          (IBKR's published tiered USD interest structure) and a Reg T/FINRA margin
+                          calculator (real infra for if/when Agent 2 ever stops being long-only/cash-
+                          account — unused today by design). Currency hedging deliberately NOT built —
+                          no FX exposure exists yet; see manager.py's docstring. Live finding: at the
+                          real $1,000 stage-3 account size, cash yield is genuinely $0 (both the $10k
+                          uncompensated threshold and the NAV proration bind). Run: `python -m agents.treasury`.
 .claude/references/       On-demand detail, e.g. qlib-known-issues.md. Add new ones here as they recur.
 .venv/                    Python 3.12 (NOT system Python, which is 3.14 — see qlib-known-issues.md)
 ```
 
-**14 of 16 agents are built** (1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15). Only 5 and 16 remain,
-both deferred by policy — see each row above. The rest of the architecture map is the target layout —
-build into it, don't invent a different one.
+**All 16 agents are built.** The rest of the architecture map is the target layout — build into it,
+don't invent a different one.
 
 ## Ground rules (specific decisions, not slogans)
 
@@ -159,7 +172,8 @@ build into it, don't invent a different one.
 - Run the portfolio agent manually: `cd backend && python -m agents.portfolio` (chains Agent 6 -> 7 -> 2
   on live data; runs bounds / position-cap / shrinkage-conditioning / regime / all-cash checks).
 - Run any agent: `cd backend && python -m agents.<name>` — research, stats, macro, alpha, portfolio,
-  execution, operations, compliance, modelrisk, datainfra, backtest (and `python -m risk` for the CRO).
+  execution, operations, compliance, modelrisk, datainfra, backtest, codegen, quantum, treasury (and
+  `python -m risk` for the CRO, `python -m core` for the orchestrator).
 - Run the orchestrator manually: `cd backend && python -m core` (Agent 1 — chains macro -> alpha ->
   portfolio -> risk_gate -> execution -> compliance -> a real Anthropic-backed CIO synthesis; makes one
   paid Claude call per invocation, ~10-15s, real cost — see backend/core/config.py's two-tier LLM note
