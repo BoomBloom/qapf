@@ -2,8 +2,7 @@
 
 **Type:** `wayfinder:task`
 **Blocked by:** None — can start immediately.
-**Status:** HALF DONE, 2026-08-19 — membership fixed for free; delisted prices genuinely need the
-operator (see Resolution)
+**Status:** HALF DONE, 2026-08-19 — membership fixed for free; delisted prices need the operator (see Resolution)
 
 ## Question
 

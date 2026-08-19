@@ -11,13 +11,14 @@
 :root{
   --ink:#0E1218; --raise:#141A23; --raise2:#1A222D; --line:#252F3C;
   --parchment:#E9E5DB; --muted:#8B97A8; --faint:#5C6675;
-  --verified:#4FA89B; --caution:#C9A227; --breach:#C2544D;
+  --verified:#4FA89B; --caution:#C9A227; --breach:#C2544D; --idle:#5C6675;
+  --accent:#C9924B;
   --display:'Spectral',Georgia,serif;
   --sans:'IBM Plex Sans',system-ui,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:4.2rem}
 body{
   background:var(--ink); color:var(--parchment); font-family:var(--sans);
   font-size:15px; line-height:1.55; letter-spacing:.005em;
@@ -25,12 +26,24 @@ body{
 }
 .wrap{max-width:1180px;margin:0 auto;padding:0 1.5rem}
 
+/* ---------- nav ---------- */
+.topnav{
+  position:sticky;top:0;z-index:20;background:rgba(14,18,24,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topnav-in{max-width:1180px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:1.6rem;height:3.4rem;overflow-x:auto}
+.brand{font-family:var(--display);font-weight:600;font-size:1.02rem;letter-spacing:-.01em;white-space:nowrap;flex:none;color:var(--parchment);text-decoration:none}
+.navlinks{display:flex;gap:1.3rem;flex:1;white-space:nowrap}
+.navlinks a{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:.3rem 0;border-bottom:1px solid transparent}
+.navlinks a:hover{color:var(--parchment);border-color:var(--line)}
+.health-pill{flex:none;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;padding:.28rem .6rem;border-radius:2px;border:1px solid currentColor;white-space:nowrap}
+
 /* ---------- masthead ---------- */
-.masthead{border-bottom:1px solid var(--line);padding:3.5rem 0 1.75rem;margin-bottom:2.5rem}
+.masthead{border-bottom:1px solid var(--line);padding:3.2rem 0 1.75rem;margin-bottom:2.5rem}
 .eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
-h1{font-family:var(--display);font-weight:300;font-size:clamp(2.4rem,6vw,3.8rem);line-height:1.05;margin:.5rem 0 .75rem;letter-spacing:-.015em}
+h1{font-family:var(--display);font-weight:300;font-size:clamp(2.2rem,5.4vw,3.4rem);line-height:1.05;margin:.5rem 0 .75rem;letter-spacing:-.015em}
 h1 em{font-style:italic;color:var(--muted)}
-.standfirst{max-width:56ch;color:var(--muted);font-size:1.02rem}
+.standfirst{max-width:60ch;color:var(--muted);font-size:1.02rem}
 .stamp{font-family:var(--mono);font-size:.72rem;color:var(--faint);margin-top:1.25rem}
 
 /* ---------- the spine (signature element) ---------- */
@@ -62,16 +75,19 @@ h1 em{font-style:italic;color:var(--muted)}
 .v-idle{color:var(--faint)}
 
 /* ---------- sections ---------- */
-section{margin:0 0 3.25rem}
+section{margin:0 0 3.25rem;scroll-margin-top:4.2rem}
 h2{
   font-family:var(--display);font-weight:400;font-size:1.5rem;letter-spacing:-.01em;
   padding-bottom:.6rem;border-bottom:1px solid var(--line);margin-bottom:1.25rem;
   display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;
 }
 h2 span{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+h3{font-family:var(--display);font-size:1.05rem;font-weight:600;margin:0 0 .75rem}
+p.lede{color:var(--muted);font-size:.92rem;max-width:74ch;margin-bottom:1.1rem}
 
 .grid{display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
 .g3{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .cell{background:var(--raise);padding:1.1rem 1.15rem}
 .cell .k{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:.4rem}
 .cell .v{font-family:var(--mono);font-size:1.5rem;font-weight:500;letter-spacing:-.02em}
@@ -87,6 +103,7 @@ tbody tr:hover{background:var(--raise)}
 .num{text-align:right;font-variant-numeric:tabular-nums}
 .pos{color:var(--verified)} .neg{color:var(--breach)}
 .bar{display:inline-block;height:3px;background:var(--verified);vertical-align:middle;border-radius:2px}
+.tablewrap{overflow-x:auto}
 
 /* roster */
 .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
@@ -109,6 +126,26 @@ tbody tr:hover{background:var(--raise)}
 svg{display:block;width:100%;height:auto;overflow:visible}
 .axis{font-family:var(--mono);font-size:9px;fill:var(--faint)}
 
+/* capability cards (agents 1 & 8) */
+.capcard{background:var(--raise);border:1px solid var(--line);padding:1.25rem 1.4rem}
+.capcard .n{font-family:var(--mono);font-size:.68rem;color:var(--faint);letter-spacing:.1em}
+.capcard h3{margin:.3rem 0 .6rem}
+.capcard p{color:var(--muted);font-size:.88rem;max-width:60ch;margin-bottom:.9rem}
+.runcmd{font-family:var(--mono);font-size:.78rem;background:var(--ink);border:1px solid var(--line);padding:.55rem .75rem;border-radius:3px;color:var(--accent);overflow-x:auto;white-space:pre}
+
+/* wayfinder */
+.destination{background:var(--raise);border:1px solid var(--line);border-left:2px solid var(--accent);padding:1.25rem 1.5rem;margin-bottom:1.5rem;font-family:var(--display);font-size:1.05rem;line-height:1.5;color:var(--muted)}
+.destination strong{color:var(--parchment);font-weight:600}
+.tickets{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line)}
+.ticket{background:var(--raise);padding:.9rem 1.1rem;display:grid;grid-template-columns:2.6rem 1fr auto;gap:1rem;align-items:baseline}
+.ticket .tn{font-family:var(--mono);font-size:.76rem;color:var(--faint)}
+.ticket .tt{font-size:.9rem}
+.ticket .ts{font-family:var(--mono);font-size:.72rem;text-align:right;max-width:34ch}
+.wf-progress{display:flex;align-items:center;gap:.7rem;margin-bottom:1.25rem}
+.wf-bar{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.wf-bar-fill{height:100%;background:var(--verified);border-radius:3px}
+.wf-progress .wf-count{font-family:var(--mono);font-size:.78rem;color:var(--muted);white-space:nowrap}
+
 .foot{border-top:1px solid var(--line);padding-top:1.5rem;color:var(--faint);font-size:.82rem;max-width:78ch}
 .foot code{font-family:var(--mono);color:var(--muted)}
 
@@ -117,33 +154,54 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   .cell .v{font-size:1.25rem}
   table{font-size:.78rem}
   th,td{padding:.45rem .5rem}
+  .ticket{grid-template-columns:1fr;gap:.3rem}
+  .ticket .ts{text-align:left}
 }
 @media (prefers-reduced-motion:no-preference){
-  .stage,.cell,.a{animation:rise .5s cubic-bezier(.2,.7,.3,1) backwards}
+  .stage,.cell,.a,.ticket{animation:rise .5s cubic-bezier(.2,.7,.3,1) backwards}
 }
 @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 :focus-visible{outline:2px solid var(--verified);outline-offset:2px}
 </style>
 </head>
 <body>
-<div class="wrap">
+<nav class="topnav">
+  <div class="topnav-in">
+    <a class="brand" href="#top">QAPF</a>
+    <div class="navlinks">
+      <a href="#chain">Chain</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#backtest">Backtest</a>
+      <a href="#risk">Risk</a>
+      <a href="#quantum">Quantum</a>
+      <a href="#treasury">Treasury</a>
+      <a href="#capabilities">CIO &amp; Code-gen</a>
+      <a href="#roster">Roster</a>
+      <a href="#wayfinder">Wayfinder</a>
+    </div>
+    <span class="health-pill" id="health-pill">—</span>
+  </div>
+</nav>
+<div class="wrap" id="top">
   <header class="masthead">
     <div class="eyebrow">Quantitative Autonomous Prop Firm</div>
     <h1>The firm, and <em>what it doubts</em>.</h1>
     <p class="standfirst">Sixteen agents research, allocate, execute and police a portfolio.
       Each one publishes its own verdict on its own work — including the unflattering ones.
-      This page shows the chain, end to end, exactly as the agents computed it.</p>
+      This page shows the chain end to end, exactly as the agents computed it, plus every
+      standalone capability that doesn't sit on that chain.</p>
     <div class="stamp" id="stamp">—</div>
   </header>
 
-  <section>
+  <section id="chain">
     <h2>Decision chain <span>Each stage hands to the next</span></h2>
     <div class="spine" id="spine"></div>
   </section>
 
-  <section>
+  <section id="portfolio">
     <h2>Target portfolio <span id="pf-meta">—</span></h2>
     <div class="grid g3" id="pf-stats"></div>
+    <div class="tablewrap">
     <table style="margin-top:1.25rem">
       <thead><tr>
         <th>Ticker</th><th class="num">Weight</th><th class="num">Signal</th>
@@ -151,9 +209,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </tr></thead>
       <tbody id="pf-rows"></tbody>
     </table>
+    </div>
   </section>
 
-  <section>
+  <section id="backtest">
     <h2>Backtest <span id="bt-window">—</span></h2>
     <div class="grid g3" id="bt-stats"></div>
     <div class="chart" style="margin-top:1.25rem">
@@ -164,24 +223,63 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <section>
     <h2>What the firm doubts <span>Agent 14 · independent validation</span></h2>
     <div class="grid g3" id="mr-stats" style="margin-bottom:1.25rem"></div>
+    <div class="tablewrap">
     <table>
       <thead><tr><th>Regime</th><th class="num">Days</th><th class="num">Return</th><th class="num">Sharpe</th></tr></thead>
       <tbody id="mr-rows"></tbody>
     </table>
+    </div>
     <div id="mr-findings" style="margin-top:1.25rem"></div>
   </section>
 
-  <section>
+  <section id="risk">
+    <h2>Risk &amp; kill switch <span>Agent 10 · isolated from the LLM graph</span></h2>
+    <div class="grid g3" id="risk-stats"></div>
+    <p class="lede" id="risk-note" style="margin-top:1.1rem"></p>
+  </section>
+
+  <section id="quantum">
+    <h2>Quantum subset selection <span>Agent 5 · benchmarked vs. classical every run</span></h2>
+    <p class="lede">A different question than Agent 2's continuous weights: which <em>k</em> of
+      <em>n</em> candidate names should even be in the book. QAOA never gets trusted alone —
+      it's checked against brute-force enumeration on every run.</p>
+    <div class="grid g3" id="qc-stats"></div>
+    <p class="lede" id="qc-note" style="margin-top:1.1rem"></p>
+  </section>
+
+  <section id="treasury">
+    <h2>Treasury &amp; funding <span>Agent 16 · cash yield + Reg T margin</span></h2>
+    <div class="grid g2" id="tr-stats"></div>
+  </section>
+
+  <section id="capabilities">
+    <h2>CIO &amp; code generation <span>Agents 1 &amp; 8 · run on demand, not on every refresh</span></h2>
+    <p class="lede">Both make real LLM calls, so neither runs automatically when this
+      snapshot regenerates — that would spend real money just to refresh a page.</p>
+    <div class="grid g2" id="cap-cards"></div>
+  </section>
+
+  <section id="roster">
     <h2>Roster <span id="roster-meta">—</span></h2>
     <div class="roster" id="roster"></div>
+  </section>
+
+  <section id="wayfinder">
+    <h2>Wayfinder <span id="wf-meta">—</span></h2>
+    <div class="wf-progress">
+      <div class="wf-bar"><div class="wf-bar-fill" id="wf-bar-fill"></div></div>
+      <span class="wf-count" id="wf-count">—</span>
+    </div>
+    <div class="destination" id="wf-destination"></div>
+    <div class="tickets" id="wf-tickets"></div>
   </section>
 
   <footer class="foot">
     <p>Every figure is produced by running the agents against live data —
       FRED, yfinance and Qlib's bundled dataset. Regenerate with
       <code>cd backend &amp;&amp; python -m dashboard.export</code>.
-      Risk limits are unset by design: they encode risk appetite, which is the operator's
-      decision, not the system's.</p>
+      Risk limits are a deliberate operator decision (wayfinder ticket 01), not a default —
+      see the Risk section for the current values and whether they've been breached.</p>
   </footer>
 </div>
 
@@ -204,7 +302,7 @@ function positionsSub(d) {
   return parts.join(' · ') || 'all signalled names held';
 }
 
-fetch('data/snapshot.json').then(r => r.json()).then(render).catch(e => {
+fetch('data/snapshot.json', { cache: 'no-store' }).then(r => r.json()).then(render).catch(e => {
   document.getElementById('stamp').textContent =
     'No snapshot found. Run: cd backend && python -m dashboard.export';
   console.error(e);
@@ -242,8 +340,11 @@ function render(d) {
       verdict: cp.clean ? 'clean' : 'flagged',
       note: `Screened ${cp.orders_reviewed} orders against ${cp.rules.length} rules: ${cp.rules.join(', ').replace(/_/g, ' ')}.` },
     { n: 10, name: 'Chief Risk Officer', out: `VaR ${fmtPct(d.risk.historical_var)} · CVaR ${fmtPct(d.risk.historical_cvar)}`,
-      state: d.risk.limits_set ? 'verified' : 'caution', verdict: d.risk.limits_set ? 'armed' : 'limits unset',
-      note: `Kill switch is not armed: drawdown and daily-loss limits are a risk-appetite decision left to the operator. Historical VaR exceeds the Gaussian estimate (${fmtPct(d.risk.parametric_var)}), as fat tails predict.` },
+      state: !d.risk.limits_set ? 'caution' : d.risk.current_assessment ? 'breach' : 'verified',
+      verdict: !d.risk.limits_set ? 'limits unset' : d.risk.current_assessment ? 'HALTED' : 'armed',
+      note: d.risk.limits_set
+        ? `Kill switch armed at ${fmtPct(d.risk.max_drawdown_pct, 0)} drawdown / ${fmtPct(d.risk.max_daily_loss_pct, 0)} daily loss (wayfinder ticket 01). Historical VaR exceeds the Gaussian estimate (${fmtPct(d.risk.parametric_var)}), as fat tails predict.`
+        : `Kill switch is not armed: drawdown and daily-loss limits are a risk-appetite decision left to the operator.` },
     { n: 14, name: 'Model Risk', out: mr.verdict.split('—')[0].trim(),
       state: mr.verdict.startsWith('NOT') ? 'breach' : mr.verdict.startsWith('QUALIFIED') ? 'caution' : 'verified',
       verdict: mr.findings.length + ' findings',
@@ -266,6 +367,16 @@ function render(d) {
       <p class="stage-note">${s.note}</p>`;
     spine.appendChild(node);
   });
+
+  /* ---------- overall health pill (nav) ---------- */
+  const anyBreach = stages.some(s => s.state === 'breach');
+  const anyCaution = stages.some(s => s.state === 'caution');
+  const healthState = anyBreach ? 'breach' : anyCaution ? 'caution' : 'verified';
+  const healthCls = healthState === 'verified' ? 'v-verified' : healthState === 'caution' ? 'v-caution' : 'v-breach';
+  const healthText = healthState === 'verified' ? 'nominal' : healthState === 'caution' ? 'attention' : 'halted';
+  const pill = document.getElementById('health-pill');
+  pill.textContent = healthText;
+  pill.className = 'health-pill ' + healthCls;
 
   /* ---------- portfolio ---------- */
   document.getElementById('pf-meta').textContent = `Agent 2 · ${d.portfolio.optimizer} · as of ${d.portfolio.as_of}`;
@@ -335,6 +446,61 @@ function render(d) {
       `<span class="verdict ${cls}">${f.severity}</span><p><strong>${f.category.replace(/_/g, ' ')}</strong> — ${f.text}</p>`));
   });
 
+  /* ---------- risk & kill switch ---------- */
+  const rk = d.risk;
+  const riskStats = [
+    ['Max drawdown limit', fmtPct(rk.max_drawdown_pct, 0), 'halt threshold, ticket 01'],
+    ['Max daily loss limit', fmtPct(rk.max_daily_loss_pct, 0), 'halt threshold, ticket 01'],
+    ['Historical VaR / CVaR', `${fmtPct(rk.historical_var)} / ${fmtPct(rk.historical_cvar)}`, '95% confidence'],
+    ['Kill switch', rk.current_assessment ? 'TRIGGERED' : 'armed, not triggered', rk.breaches.length ? rk.breaches.join(', ') : 'no breaches on latest data']
+  ];
+  const rkGrid = document.getElementById('risk-stats');
+  riskStats.forEach(([k, v, s], i) => {
+    const c = el('div', 'cell', `<span class="k">${k}</span><span class="v">${v}</span><div class="sub">${s}</div>`);
+    if (i === 3) c.querySelector('.v').classList.add(rk.current_assessment ? 'neg' : 'pos');
+    rkGrid.appendChild(c);
+  });
+  document.getElementById('risk-note').textContent =
+    'A halt requires re-validation against the ticket 02 bar on fresh data before trading resumes — not a manual override alone (wayfinder ticket 01). Enforcement lives in Agent 1\'s orchestrator: a halted state routes straight to the CIO memo, skipping execution and compliance, so zero orders are ever constructed once the CRO trips.';
+
+  /* ---------- quantum (Agent 5) ---------- */
+  const qc = d.quantum;
+  const qcStats = [
+    ['Candidate pool', qc.universe.length + ' names', qc.universe.join(', ')],
+    ['Selected (k=' + qc.k + ')', qc.qaoa_selected.join(', '), qc.qaoa_matches_optimum ? 'matches brute-force optimum' : 'did NOT match the optimum'],
+    ['QAOA time', qc.qaoa_seconds.toFixed(3) + 's', 'vs. brute force ' + qc.brute_force_seconds.toFixed(4) + 's'],
+    ['Speed ratio', (qc.qaoa_seconds / Math.max(qc.brute_force_seconds, 1e-9)).toFixed(0) + '× slower', 'on a problem trivial for classical solvers']
+  ];
+  const qcGrid = document.getElementById('qc-stats');
+  qcStats.forEach(([k, v, s]) => qcGrid.appendChild(el('div', 'cell', `<span class="k">${k}</span><span class="v">${v}</span><div class="sub">${s}</div>`)));
+  document.getElementById('qc-note').textContent =
+    (qc.reasoning && qc.reasoning.length ? qc.reasoning[qc.reasoning.length - 1] : '') +
+    ' Confirms README\'s own "Scope warning": a research curiosity, not what Agent 2 actually uses.';
+
+  /* ---------- treasury (Agent 16) ---------- */
+  const tr = d.treasury;
+  const trCards = [
+    ['Cash yield at $1,000 (real stage-3 size)', '$' + tr.cash_yield_at_1k.annual_interest.toFixed(2) + '/yr',
+      tr.cash_yield_at_1k.reasoning[tr.cash_yield_at_1k.reasoning.length - 1]],
+    ['Cash yield at $' + Math.round(tr.cash_yield_at_portfolio_value.nav).toLocaleString() + ' (illustrative)',
+      '$' + Math.round(tr.cash_yield_at_portfolio_value.annual_interest).toLocaleString() + '/yr',
+      fmtPct(tr.cash_yield_at_portfolio_value.effective_apy, 2) + ' effective APY at full tier'],
+    ['Reg T / FINRA margin', tr.margin.margin_call ? 'MARGIN CALL' : 'no call',
+      tr.margin.reasoning[tr.margin.reasoning.length - 1]],
+  ];
+  const trGrid = document.getElementById('tr-stats');
+  trCards.forEach(([k, v, s]) => trGrid.appendChild(el('div', 'cell', `<span class="k">${k}</span><span class="v">${v}</span><div class="sub">${s}</div>`)));
+
+  /* ---------- capabilities (Agents 1 & 8) ---------- */
+  const capGrid = document.getElementById('cap-cards');
+  [
+    ['A01', 'Lead Orchestrator (CIO)', d.orchestrator.description, d.orchestrator.run_command],
+    ['A08', 'Quant Software Engineering', d.codegen.description, d.codegen.run_command],
+  ].forEach(([n, name, desc, cmd]) => {
+    capGrid.appendChild(el('div', 'capcard',
+      `<span class="n">${n}</span><h3>${name}</h3><p>${desc}</p><div class="runcmd">${cmd}</div>`));
+  });
+
   /* ---------- roster ---------- */
   const counts = d.roster.reduce((a, r) => (a[r.status] = (a[r.status] || 0) + 1, a), {});
   document.getElementById('roster-meta').textContent =
@@ -346,6 +512,29 @@ function render(d) {
        <div class="nm">${r.name}</div><div class="nt">${r.note}</div></div>`);
     a.style.animationDelay = (i * 20) + 'ms';
     rost.appendChild(a);
+  });
+
+  /* ---------- wayfinder ---------- */
+  const wf = d.wayfinder;
+  document.getElementById('wf-meta').textContent = `${wf.closed_count}/${wf.total_count} tickets closed`;
+  // wf.destination is markdown source (from MAP.md) -- only **bold** ever
+  // appears in this specific field, so a narrow, escaped-first replace is
+  // safe without pulling in a markdown parser for one string.
+  const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const destText = wf.destination.replace(/\s+/g, ' ').trim();
+  document.getElementById('wf-destination').innerHTML =
+    escapeHtml(destText).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  const pct = wf.total_count ? (wf.closed_count / wf.total_count * 100) : 0;
+  document.getElementById('wf-bar-fill').style.width = pct.toFixed(0) + '%';
+  document.getElementById('wf-count').textContent = `${wf.closed_count} of ${wf.total_count} closed`;
+  const wfRows = document.getElementById('wf-tickets');
+  wf.tickets.forEach((t, i) => {
+    const row = el('div', 'ticket');
+    row.style.animationDelay = (i * 15) + 'ms';
+    row.innerHTML = `<span class="tn">${String(t.n).padStart(2, '0')}</span>
+      <span class="tt">${t.title}</span>
+      <span class="ts ${t.closed ? 'v-verified' : 'v-idle'}">${t.status}</span>`;
+    wfRows.appendChild(row);
   });
 }
 
