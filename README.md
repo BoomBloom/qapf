@@ -126,9 +126,9 @@ multiprocessing (directly or via Qlib internals) must guard its entry point with
 | 15 | Data Infrastructure & Reliability | **Build custom** | Absent from both repos. Watches every upstream feed (FRED, yfinance, arXiv, GitHub, and Qlib's own data store) for staleness, schema drift, and outages. Motivated by this project's own history, not speculation — see "Why Agent 15 exists" below |
 | 16 | Treasury & Funding | **Build custom** (defer) | Absent from both repos. Margin, collateral, funding costs, and currency hedging of firm capital — distinct from the Portfolio Manager, which allocates strategy capital, not manages the cash/broker relationship. Lower priority for a single-operator system without multiple prime broker relationships; named so it isn't silently forgotten |
 
-**Net:** 4 adapt, 3 extend, 9 build custom (2 explicitly deferred: Agent 5,
-Agent 16). Roughly half the system has a real foundation already —
-considerably better than starting cold.
+**Net:** 4 adapt, 3 extend, 9 build custom (2 built last, on request, after being deferred by policy:
+Agent 5, Agent 16 — see "Scope warning" below for what Agent 5's own verification found). Roughly half
+the system had a real foundation already — considerably better than starting cold.
 
 ### Why Agent 15 (Data Infrastructure & Reliability) exists
 
@@ -435,6 +435,13 @@ candidates to cut or defer:
   not beat classical solvers for portfolio problems of realistic size, and
   `cvxpy` (already a Qlib dependency) will handle the actual optimization
   better. Keep it as a research curiosity, not a critical path item.
+  **Empirically confirmed, not just predicted**, once built (2026-08-19,
+  `backend/agents/quantum/`): on real live signals and covariance from Agents
+  6/7/2, QAOA found the same correct answer as brute-force enumeration and an
+  exact classical eigensolver — but took ~13,000x longer to do it on a
+  6-name problem trivial for classical solvers. Kept in the roster as working,
+  verified code precisely because the honest result is informative, not
+  because it changes what QAPF's real allocator (Agent 2) uses.
 - **Per-decision LLM cost.** A 12-agent graph with multi-round debate makes
   many LLM calls per trading decision. Phase 0 step 1 exists specifically to
   measure this before the architecture is locked in. If cost is high, the fix
