@@ -17,6 +17,13 @@ Needs the `if __name__ == "__main__":` guard -- both LLM calls and the reused
 qlib backtest touch things that don't tolerate macOS's spawn-based
 multiprocessing re-importing this module (see .claude/references/
 qlib-known-issues.md).
+
+REAL SIDE EFFECT: if SLACK_WEBHOOK_URL is set in .env, every cio_synthesis
+call below posts a real message to that Slack channel (two per run of this
+script -- one per pipeline invocation). That's intentional here, not a
+leftover mock: it's the actual proof the alerting works end to end, the same
+"verify against real execution" standard everything else in this file holds
+to. Expect two messages in Slack each time this script runs.
 """
 
 import logging

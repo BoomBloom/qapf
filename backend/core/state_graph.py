@@ -29,9 +29,17 @@ continuously), not steps in generating today's live allocation. Folding them
 in as synchronous nodes would be a category error, not a completeness gap.
 Agent 12 (Operations) is also absent for a concrete reason, not an oversight:
 its `reconcile()` compares target positions to REAL fills, and this system has
-no live broker connection yet (wayfinder ticket 09, still open) — including it
-here would mean fabricating fill data, which CLAUDE.md's "no placeholder
-data" rule forbids.
+no live broker connection yet (wayfinder ticket 09 chose Interactive Brokers,
+2026-08-20, but the account/API-credential setup itself is still pending) —
+including Agent 12 here would mean fabricating fill data, which CLAUDE.md's
+"no placeholder data" rule forbids.
+
+SLACK ALERTING (2026-08-20, "monitor by exception"): `cio_synthesis` posts
+every memo it generates to a Slack webhook (`notifier.py`, fails soft --
+a Slack outage never blocks the pipeline). This only fires on a real,
+manually-triggered `python -m core` run; the daily launchd dashboard refresh
+(`scripts/refresh_dashboard.sh`) does not call Agent 1 at all, so this can't
+turn into automatic daily Slack spam by itself.
 
 KILL-SWITCH ENFORCEMENT (wayfinder ticket 12): `risk_gate` is the choke point.
 When the CRO's kill switch trips, the conditional edge below routes straight
@@ -65,6 +73,7 @@ from risk.monitor import RiskMonitor
 from risk.schemas import RiskLimits
 
 from .config import get_deep_llm
+from .notifier import send_slack_alert
 from .schemas import PipelineState
 
 logger = logging.getLogger(__name__)
@@ -217,6 +226,15 @@ def cio_synthesis_node(state: PipelineState) -> dict:
     response = llm.invoke(prompt)
     memo = response.content if hasattr(response, "content") else str(response)
     logger.info("cio_synthesis_node: memo generated (%d chars)", len(memo))
+
+    # "Monitor by exception" (2026-08-20 wayfinder discussion): the operator
+    # gets paged on every real Agent 1 run, not left to check a terminal.
+    # This only fires when someone actually runs `python -m core` -- the
+    # daily launchd dashboard refresh does NOT call Agent 1 (real Anthropic
+    # cost per call), so this can't turn into daily Slack spam by itself.
+    header = "🚨 QAPF HALTED" if state.halted else "QAPF — CIO memo"
+    send_slack_alert(f"*{header}*\n{memo}")
+
     return {"cio_memo": memo}
 
 
