@@ -3,7 +3,8 @@
 **Type:** `wayfinder:task`
 **Blocked by:** NOTHING — 02, 05 and 06 are all closed. **This is now the frontier ticket, and the one
 where the map's destination is reached or not.**
-**Status:** OPEN — FAILS the bar (attempt 3 of 5); DSR now the binding constraint, 2026-08-20
+**Status:** OPEN — FAILS the bar (attempt 4 of 5). **1 attempt remains — spend it deliberately.**
+2026-08-20
 
 ## Question
 
@@ -202,3 +203,64 @@ document's #3 (absolute momentum with a cash leg, a genuinely different signal-g
 another risk-scaling refinement) or #4 (risk-based allocation as an honest, near-zero-parameter
 benchmark) are the more promising remaining candidates precisely because they don't add more trials to an
 already-strained budget the way another vol-estimator swap would.
+
+## Attempt 4 (2026-08-20) — risk-based tilt; isolates where the improvement actually came from
+
+Chose the research doc's #4 (risk-based allocation) over #3 (momentum) deliberately, on attempt 3's own
+lesson: with DSR trial-count now binding, the right criterion is FEWEST free parameters, not highest
+expected raw improvement — and #4 adds zero new parameters (it removes three factors rather than adding
+anything).
+
+**Approximation stated plainly, not blurred:** true minimum-variance needs a weight-level optimizer
+(Qlib's `PortfolioOptimizer`, which Agent 2's LIVE path already uses), but `WalkForwardBacktester`'s
+historical engine is built on Qlib's `TopkDropoutStrategy`, which consumes a per-name RANKING, not target
+weights. That's a real architecture mismatch between the live and backtest paths — worth recording as its
+own finding. Rather than rebuild the backtest execution engine, this attempt tested the honest,
+literature-supported simplification: a pure inverse-volatility (naive risk parity) tilt — rank solely on
+the Yang-Zhang low_volatility factor, zero weight on momentum/reversal/volume. A real risk-based method,
+but NOT full covariance-based GMV.
+
+```
+                          Strategy     Benchmark
+Total return               +103.69%      +322.75%
+Annualized Sharpe             0.718         0.849
+Max drawdown                -17.68%       -39.03%
+Return per unit DD            4.060         2.175
+
+Deflated Sharpe Ratio: 0.8870 (n_trials=4)
+Final account: $2,036.86 (started $1,000)
+```
+
+- **[FAIL]** DSR — 0.8870, down again from attempt 3's 0.9301 (trial count 3→4).
+- **[FAIL]** Beats benchmark Sharpe — 0.718 vs 0.849 (slightly WORSE than attempt 3's 0.738).
+- **[PASS]** Return-per-unit-max-drawdown — 4.060 vs 2.175.
+- **[PASS]** Profitable — $2,036.86.
+
+**The genuinely useful finding, which is not the pass/fail:** max drawdown was **-17.68% here vs -17.64%
+in attempt 3** — essentially identical, despite completely different factor weights (pure low-vol vs. an
+equal blend of four factors). Combined with attempt 2's -26.48% → attempt 3's -17.64%, this isolates
+where the improvement actually came from: **the volatility-managed exposure layer and the Yang-Zhang
+estimator feeding it, NOT which factors drive the cross-sectional signal.** Changing the signal
+composition barely moves the result. That is strong evidence the cross-sectional factor layer is close to
+irrelevant on this universe — exactly what `docs/research/viable-alpha-families.md` §1.2 predicted for a
+15-name book ("the edge IS the cross-section... with 15 names you do not have one"), now confirmed
+empirically here rather than only argued from the literature.
+
+## 1 attempt remains — recommendation for how to spend it
+
+Do NOT spend attempt 5 on another variation of the same theme; four attempts have now established the
+pattern. Two coherent options, both genuinely different in kind:
+
+1. **Absolute (time-series) momentum with a cash leg** (research doc #3) — the one remaining candidate
+   whose published evidence is specifically for a long-only construction with a cash alternative, and the
+   only untried mechanism that changes WHEN the book is invested rather than merely how it's weighted or
+   scaled. Costs 2 parameters (lookback, hurdle) against a strained budget, but it's the last idea with a
+   real prior behind it.
+2. **Spend it on the PIT universe instead** (ticket 13) — every attempt so far has run on the
+   survivorship-biased hand-picked 14 names. If the operator does the Sharadar signup, attempt 5 could
+   test the CURRENT best configuration (attempt 3's) on honest data, which answers a different and
+   arguably more important question than another strategy variant: is the ~2x return even real?
+
+**Option 2 is the more informative use of the last attempt** if the Sharadar signup happens, because a
+strategy that clears the bar on biased data still can't be trusted, while a clean answer on real data is
+decision-grade either way. Operator's call — this is deliberately not decided here.

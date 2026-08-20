@@ -66,18 +66,22 @@ the regime where it bets hardest on momentum, suggesting the hand-set priors may
   Mac/Wachovia's actual 2008 removals correctly captured — the vendored builder was actually broken
   against the live Wikipedia page, fixed by reading a historical revision instead). Delisted PRICE data
   still needs the operator to personally sign up for Sharadar ($9/mo) — cannot be done on their behalf.
-- [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **FAILS, attempt 3 of 5. 2
-  attempts remain.** Trajectory: attempt 1 (flat weights) DSR 0.9636 pass / Sharpe 0.564 fail / return-DD
-  1.536 fail. Attempt 2 (+ volatility-managed exposure, Moreira & Muir) DSR 0.9615 pass / Sharpe 0.726
-  fail / return-DD 2.741 **pass**. Attempt 3 (+ Yang-Zhang range-vol factor, landed as real production
-  code in `agents/alpha/factors.py`) DSR **0.9301 fail** / Sharpe 0.738 fail / return-DD 4.182 pass.
-  **DSR regressed and became the binding constraint** — the honest trial-count penalty (n_trials 2→3)
-  outran the marginal Sharpe gain (0.726→0.738, barely moved), independently validating
-  `docs/research/viable-alpha-families.md` §0.2's warning about trial-count honesty. Drawdown control
-  keeps improving materially (-36.74%→-26.48%→-17.64%) but signal quality has plateaued — evidence to
-  pivot attempt 4 toward a structurally different mechanism (absolute momentum, or risk-based allocation
-  as a near-zero-parameter benchmark) rather than another vol-estimator refinement. Deliberately still
-  NOT combined with ticket 13's PIT-universe fix (incomplete without Sharadar; would conflate variables).
+- [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **FAILS, attempt 4 of 5. Only
+  1 attempt remains.** Trajectory (DSR / Sharpe / return-per-maxDD / max drawdown):
+  attempt 1 flat weights 0.9636✓ / 0.564✗ / 1.536✗ / -36.74%;
+  attempt 2 + vol-managed exposure 0.9615✓ / 0.726✗ / 2.741✓ / -26.48%;
+  attempt 3 + Yang-Zhang range-vol 0.9301✗ / 0.738✗ / 4.182✓ / -17.64%;
+  attempt 4 pure low-vol tilt 0.8870✗ / 0.718✗ / 4.060✓ / -17.68%.
+  **Two things are now established empirically, not just argued.** (a) DSR became the binding constraint
+  and keeps falling as trial count rises faster than Sharpe improves — `viable-alpha-families.md` §0.2's
+  trial-count warning, confirmed. (b) Attempt 4's drawdown (-17.68%) is essentially identical to attempt
+  3's (-17.64%) despite completely different factor weights, which **isolates the improvement to the
+  volatility-management layer, not the cross-sectional factor signal** — confirming §1.2's prediction
+  that a 15-name universe is too small for a cross-sectional edge to exist at all. Deliberately still NOT
+  combined with ticket 13's PIT-universe fix (incomplete without Sharadar; would conflate variables).
+  **Recommendation for the last attempt: spend it on the PIT universe (ticket 13), not another strategy
+  variant** — a strategy clearing the bar on survivorship-biased data still couldn't be trusted, so a
+  clean answer on honest data is decision-grade either way. Operator's call, not decided.
 - [09 — Broker and platform](tickets/09-broker-and-platform.md) — **Interactive Brokers**, connected via
   its own API (TWS/Client Portal), not through TradingView. IBKR turned out to already have a native
   TradingView charting/manual-order panel — the operator's "IBKR or a TradingView broker" framing was a
