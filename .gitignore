@@ -28,3 +28,4 @@ reference/
 
 # Dashboard data snapshot — regenerate with `python -m dashboard.export`
 frontend/data/snapshot.json
+scripts/logs/
