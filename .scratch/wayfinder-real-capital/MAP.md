@@ -66,15 +66,18 @@ the regime where it bets hardest on momentum, suggesting the hand-set priors may
   Mac/Wachovia's actual 2008 removals correctly captured — the vendored builder was actually broken
   against the live Wikipedia page, fixed by reading a historical revision instead). Delisted PRICE data
   still needs the operator to personally sign up for Sharadar ($9/mo) — cannot be done on their behalf.
-- [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **FAILS, attempt 2 of 5,
-  reopened.** Attempt 1: DSR 0.9636 (passes), profitable (passes), but lost to equal-weight buy-and-hold
-  on BOTH risk-adjusted measures (Sharpe 0.564 vs 0.849; return/max-DD 1.536 vs 2.175). Attempt 2 added
-  volatility-managed exposure (Moreira & Muir 2017, leverage capped at 1.0) as post-processing on the
-  SAME universe and signals — real progress: DSR 0.9615 (passes), profitable (passes), return/max-DD
-  **now beats the benchmark** (2.741 vs 2.175, flipped from a fail), but Sharpe still trails (0.726 vs
-  0.849, though much closer than attempt 1's 66%-of-benchmark ratio — now 85%). **3 attempts remain.**
-  Deliberately did NOT combine with ticket 13's PIT-universe fix in the same attempt (still incomplete
-  without Sharadar's delisted prices; conflating two variables would make neither result attributable).
+- [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **FAILS, attempt 3 of 5. 2
+  attempts remain.** Trajectory: attempt 1 (flat weights) DSR 0.9636 pass / Sharpe 0.564 fail / return-DD
+  1.536 fail. Attempt 2 (+ volatility-managed exposure, Moreira & Muir) DSR 0.9615 pass / Sharpe 0.726
+  fail / return-DD 2.741 **pass**. Attempt 3 (+ Yang-Zhang range-vol factor, landed as real production
+  code in `agents/alpha/factors.py`) DSR **0.9301 fail** / Sharpe 0.738 fail / return-DD 4.182 pass.
+  **DSR regressed and became the binding constraint** — the honest trial-count penalty (n_trials 2→3)
+  outran the marginal Sharpe gain (0.726→0.738, barely moved), independently validating
+  `docs/research/viable-alpha-families.md` §0.2's warning about trial-count honesty. Drawdown control
+  keeps improving materially (-36.74%→-26.48%→-17.64%) but signal quality has plateaued — evidence to
+  pivot attempt 4 toward a structurally different mechanism (absolute momentum, or risk-based allocation
+  as a near-zero-parameter benchmark) rather than another vol-estimator refinement. Deliberately still
+  NOT combined with ticket 13's PIT-universe fix (incomplete without Sharadar; would conflate variables).
 - [09 — Broker and platform](tickets/09-broker-and-platform.md) — **Interactive Brokers**, connected via
   its own API (TWS/Client Portal), not through TradingView. IBKR turned out to already have a native
   TradingView charting/manual-order panel — the operator's "IBKR or a TradingView broker" framing was a

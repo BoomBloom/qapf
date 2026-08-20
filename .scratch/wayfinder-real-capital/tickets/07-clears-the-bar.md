@@ -3,7 +3,7 @@
 **Type:** `wayfinder:task`
 **Blocked by:** NOTHING — 02, 05 and 06 are all closed. **This is now the frontier ticket, and the one
 where the map's destination is reached or not.**
-**Status:** OPEN (reopened) — FAILS the bar (attempt 2 of 5, closer), 2026-08-19
+**Status:** OPEN — FAILS the bar (attempt 3 of 5); DSR now the binding constraint, 2026-08-20
 
 ## Question
 
@@ -152,3 +152,53 @@ range volatility estimators — Yang-Zhang/Parkinson/Garman-Klass, an enabler th
 volatility-management signal using the O/H/L columns already downloaded and currently unused by
 `agents/alpha/factors.py`) before reaching for #3 (absolute momentum with a cash leg) or the PIT-universe
 swap. Not decided here — the operator's call.
+
+## Attempt 3 (2026-08-20) — DSR now the binding constraint, not risk-adjusted return
+
+Prototyped #2 (Yang-Zhang range-based volatility) as a monkeypatch first, against the real pipeline, with
+zero production-code changes (`.scratch/wayfinder-real-capital/yang_zhang_diagnostic.py`) — showed real
+improvement over attempt 2's baseline (Sharpe 0.726→0.738, max drawdown -26.48%→-17.64%), so it was
+promoted to real code: `agents/alpha/factors.py` now has a real `yang_zhang_volatility()` function, with
+`compute_raw_factors`/`AlphaCombiner.generate`/`WalkForwardBacktester` all gaining optional
+`opens`/`highs`/`lows` params (additive, backward-compatible — omitting them reproduces the exact prior
+close-to-close behavior). Four new correctness checks added to `agents/alpha/__main__.py`, all passing,
+including the look-ahead test now also corrupting OHLC.
+
+Built on attempt 2's baseline rather than testing in isolation — same universe (14 hand-picked names,
+unchanged), same volatility-managed exposure layer, one new variable (the factor's vol estimator).
+
+```
+                          Strategy     Benchmark
+Total return               +129.05%      +322.75%
+Annualized Sharpe             0.738         0.849
+Max drawdown                -17.64%       -39.03%
+Return per unit DD            4.182         2.175
+
+Deflated Sharpe Ratio: 0.9301 (n_trials=3)
+Final account: $2,290.45 (started $1,000)
+```
+
+- **[FAIL] DSR > 0.95 — 0.9301.** This is the actual news of attempt 3: DSR **regressed** from attempt
+  2's 0.9615 (a PASS) to a FAIL, purely from the honest trial-count penalty (n_trials 2→3) outrunning the
+  marginal Sharpe gain (0.726→0.738 — barely moved). Not a bug and not bad luck: this is the DSR
+  mechanism working exactly as intended, and it independently validates
+  `docs/research/viable-alpha-families.md` §0.2's core warning — every parameter is a trial, and trial
+  count compounds faster than incremental Sharpe improvements from here.
+- **[FAIL] Beats benchmark Sharpe — 0.738 vs 0.849.** Essentially unmoved from attempt 2.
+- **[PASS] Beats benchmark return-per-unit-max-drawdown — 4.182 vs 2.175.** Nearly double attempt 2's
+  already-passing 2.741 — the drawdown control from combining Yang-Zhang with vol-managed exposure is
+  real and substantial (-17.64% max drawdown, close to a third of the original -36.74%).
+- **[PASS] Profitable — $2,290.45 final, more than double the account.**
+
+**Overall: DOES NOT CLEAR THE BAR (attempt 3 of 5). 2 attempts remain.**
+
+**The actual signal this attempt sends:** drawdown control keeps improving materially with each change,
+but the underlying SIGNAL quality (Sharpe) has plateaued around 0.73-0.74 across two different
+volatility-management refinements — diminishing returns on this specific avenue (refining how existing
+factors are scaled/estimated), while the trial-count cost of trying keeps rising. This is evidence
+against a 4th attempt in the same direction (e.g. Parkinson/Garman-Klass as yet another vol-estimator
+variant) and evidence *for* trying something structurally different for attempt 4 — the research
+document's #3 (absolute momentum with a cash leg, a genuinely different signal-generation mechanism, not
+another risk-scaling refinement) or #4 (risk-based allocation as an honest, near-zero-parameter
+benchmark) are the more promising remaining candidates precisely because they don't add more trials to an
+already-strained budget the way another vol-estimator swap would.
