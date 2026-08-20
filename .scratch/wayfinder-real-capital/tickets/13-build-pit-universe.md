@@ -79,3 +79,20 @@ details on your behalf, so this ticket cannot fully close without you.
 **Left for whoever picks this up next:** wire the new `sp500.txt` into `validate_bar.py`'s universe
 selection (currently still the hand-picked 15 names) once a decision is made on whether to proceed with
 membership-only correction now or wait for delisted prices before running ticket 07's attempt 2.
+
+## Residency question, researched (2026-08-20)
+
+Operator asked whether Sharadar/Nasdaq Data Link would accept a signup from Jordan or a Qatar residency.
+Researched, not guessed: **neither Jordan nor Qatar appears on OFAC's sanctioned-countries list** (the
+comprehensive-embargo list is Cuba, Iran, North Korea, and Syria, plus Crimea/Donetsk/Luhansk, as of
+2026 — verified via a live search, not assumed from memory). That's the restriction category a US data
+company would actually be legally bound by, and it doesn't apply to either country.
+
+**Honest limit on this answer:** I could not directly access Sharadar's or Nasdaq Data Link's own Terms
+of Use to confirm there's no separate, narrower country-allowlist practice beyond sanctions compliance
+(sharadar.com/subscribe only linked to the terms, didn't inline them; the Nasdaq global data agreement
+PDF timed out on fetch). No sanctions-based barrier found, but "no barrier found" isn't the same as
+"confirmed accepted." **Cheapest way to actually find out: Sharadar's own free DJIA-only tier needs no
+payment method** (per `docs/research/data-and-modelling-tooling.md`'s earlier research) — signing up for
+that costs nothing and would give a definitive, first-hand answer faster than any more research here
+could.

@@ -75,6 +75,14 @@ the regime where it bets hardest on momentum, suggesting the hand-set priors may
   0.849, though much closer than attempt 1's 66%-of-benchmark ratio — now 85%). **3 attempts remain.**
   Deliberately did NOT combine with ticket 13's PIT-universe fix in the same attempt (still incomplete
   without Sharadar's delisted prices; conflating two variables would make neither result attributable).
+- [09 — Broker and platform](tickets/09-broker-and-platform.md) — **Interactive Brokers**, connected via
+  its own API (TWS/Client Portal), not through TradingView. IBKR turned out to already have a native
+  TradingView charting/manual-order panel — the operator's "IBKR or a TradingView broker" framing was a
+  false choice — but automation still needs IBKR's own API since Agent 11 already computes real orders
+  in Python. Account/API-credential setup is still the operator's own action.
+- [11 — Intraday equity tracking](tickets/11-intraday-equity-tracking.md) — **Alpaca (free) for live
+  risk monitoring, Alpha Vantage free tier (accepting a ~2-month backfill) for the historical 2008-2017
+  re-score** — operator ruled out the $199/mo paid path as too expensive. Neither wired in yet.
 
 ## Not yet specified
 

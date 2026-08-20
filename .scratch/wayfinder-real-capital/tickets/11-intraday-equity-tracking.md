@@ -2,7 +2,7 @@
 
 **Type:** `wayfinder:grilling`
 **Blocked by:** None — can start immediately.
-**Status:** open · unclaimed
+**Status:** CLOSED — Alpaca (live) + Alpha Vantage free tier (historical backfill), 2026-08-20
 
 ## Question
 
@@ -61,3 +61,14 @@ two flat-fee vendors.
 **Still open — needs the operator's call, not decided here:** which of (a) pay $199/mo, (b) accept a
 ~2-month free backfill, (c) buy FirstRateData's bundle, or (d) defer this and use live Alpaca data only
 (no historical re-score) going forward.
+
+## Resolved (2026-08-20)
+
+Operator: $199/mo (Massive) is too much, prefers the cheaper option. **Decision: option (b) — Alpaca
+free/paper tier for live intraday risk monitoring ($0, no card), and Alpha Vantage's free tier for the
+historical 2008-2017 re-score, accepting the ~2-month backfill timeline at 25 req/day rather than paying.**
+
+Both are genuinely free signups the operator can do without any payment step. Not yet built: the actual
+Alpaca websocket wiring into the CRO's live risk gate, and the Alpha Vantage backfill script (should be
+designed as a long-running background job per the research doc's own note, not an interactive one-shot —
+1,680 ticker-month requests at 25/day is real wall-clock time, not a quick script to run and wait on).
