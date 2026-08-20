@@ -1,6 +1,6 @@
 ---
 name: qapf-prime
-description: Orients Claude in the QAPF (Quantitative Autonomous Prop Firm) codebase before planning or implementing ANY agent work, risk-module work, or Qlib/TradingAgents integration work. Loads the ground rules, identifies which of the 12 agents the task concerns and its build strategy (adapt/extend/build custom), checks what's already built vs. not, and surfaces known gotchas (Qlib expression-engine bug, CRO isolation, date-offset-not-shift) before code gets written. Use this whenever a task touches backend/agents/, backend/risk/, backend/core/, reference/qlib/, reference/TradingAgents/, or mentions building/extending/fixing one of the numbered agents, the CRO, the backtester, or the portfolio optimizer in QAPF. Trigger even if the user doesn't say "prime" explicitly — any substantive QAPF implementation or planning task should start here.
+description: Orients Claude in the QAPF (Quantitative Autonomous Prop Firm) codebase before planning or implementing ANY agent work, risk-module work, or Qlib/TradingAgents integration work. Loads the ground rules, identifies which of the 16 agents the task concerns and its build strategy (adapt/extend/build custom), checks what's already built vs. not, and surfaces known gotchas (Qlib expression-engine bug, CRO isolation, date-offset-not-shift, pip-vs-source Qlib version drift) before code gets written. Use this whenever a task touches backend/agents/, backend/risk/, backend/core/, reference/qlib/, reference/TradingAgents/, or mentions building/extending/fixing one of the numbered agents, the CRO, the orchestrator, the backtester, or the portfolio optimizer in QAPF. Trigger even if the user doesn't say "prime" explicitly — any substantive QAPF implementation or planning task should start here.
 ---
 
 # QAPF Prime
@@ -24,7 +24,7 @@ Read `CLAUDE.md` at the repo root if it isn't already in context. Note in partic
 
 ## Step 2 — Identify the agent and its build strategy
 
-If the task concerns one of the 12 agents (building a new one, extending an existing one, fixing a bug in
+If the task concerns one of the 16 agents (building a new one, extending an existing one, fixing a bug in
 one), read the **Agent Roster → Build Strategy** table in `README.md` and pin down, explicitly:
 
 - Which agent number and name this is
@@ -63,9 +63,22 @@ Check whether the task touches any of the following, and if so, act accordingly:
   `.asof()`, never a positional `.shift(n)`. Real series have gaps; a positional shift silently reports
   the wrong period.
 - **Touches TradingAgents' orchestration graph** → read
-  `reference/TradingAgents/tradingagents/graph/` first. `backend/core/state_graph.py` (the planned fork of
-  `GraphSetup`) does **not exist yet** — when it is built it should follow that existing node/edge pattern
-  rather than inventing a second orchestration mechanism. Verify its current state rather than assuming.
+  `reference/TradingAgents/tradingagents/graph/` first. `backend/core/state_graph.py` (Agent 1, built
+  2026-08-19) already forks `GraphSetup`/`StateGraph` — read its module docstring before adding a node or
+  assuming a second orchestration mechanism is needed. It deliberately has only ONE LLM node
+  (`cio_synthesis`); every other node wraps an already-built deterministic agent, on purpose.
+- **Runs any script under `reference/qlib/scripts/`** (data collectors, not `backend/`'s own agents) →
+  the pip-installed `pyqlib` package and the local `reference/qlib` checkout can be different versions.
+  `python -m agents.<name>` in `backend/` correctly uses the pip-installed package and is unaffected, but
+  a standalone `reference/qlib/scripts/...` collector may need `reference/qlib` prepended to
+  `PYTHONPATH` ahead of site-packages to resolve `import qlib` to the newer local checkout (hit this
+  building the point-in-time universe collector, 2026-08-19 — `qlib.utils.pickle_utils` doesn't exist in
+  the pip release). Isolated to that one script's subprocess; never change what `backend/` itself imports.
+- **Scrapes a live web page for a one-time or periodic data build** → don't trust that the page still has
+  the structure an older script assumed. Wikipedia's S&P 500 "Selected changes" table was removed from
+  the live article entirely between when the PIT-universe research was written and when the collector was
+  actually run (2026-08-19) — verify structure against the live page (or a specific historical revision)
+  before debugging column-index math, don't assume the earlier research's description still holds.
 
 ## Step 5 — Verify, don't inherit
 
