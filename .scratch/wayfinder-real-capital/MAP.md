@@ -12,7 +12,7 @@ destination. The map is done when nothing remains to *decide* before someone goe
 
 ## Notes
 
-**Domain.** Autonomous multi-agent quant system. 12 of 16 agents built and verified against live data.
+**Domain.** Autonomous multi-agent quant system. All 16 agents built and verified against live data.
 Full context in `CLAUDE.md`; agent-by-agent rationale in `README.md`.
 
 **The staged path the operator has chosen** (locked during charting, 2026-08-19):
@@ -66,22 +66,21 @@ the regime where it bets hardest on momentum, suggesting the hand-set priors may
   Mac/Wachovia's actual 2008 removals correctly captured — the vendored builder was actually broken
   against the live Wikipedia page, fixed by reading a historical revision instead). Delisted PRICE data
   still needs the operator to personally sign up for Sharadar ($9/mo) — cannot be done on their behalf.
-- [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **FAILS, attempt 4 of 5. Only
-  1 attempt remains.** Trajectory (DSR / Sharpe / return-per-maxDD / max drawdown):
-  attempt 1 flat weights 0.9636✓ / 0.564✗ / 1.536✗ / -36.74%;
-  attempt 2 + vol-managed exposure 0.9615✓ / 0.726✗ / 2.741✓ / -26.48%;
-  attempt 3 + Yang-Zhang range-vol 0.9301✗ / 0.738✗ / 4.182✓ / -17.64%;
-  attempt 4 pure low-vol tilt 0.8870✗ / 0.718✗ / 4.060✓ / -17.68%.
-  **Two things are now established empirically, not just argued.** (a) DSR became the binding constraint
-  and keeps falling as trial count rises faster than Sharpe improves — `viable-alpha-families.md` §0.2's
-  trial-count warning, confirmed. (b) Attempt 4's drawdown (-17.68%) is essentially identical to attempt
-  3's (-17.64%) despite completely different factor weights, which **isolates the improvement to the
-  volatility-management layer, not the cross-sectional factor signal** — confirming §1.2's prediction
-  that a 15-name universe is too small for a cross-sectional edge to exist at all. Deliberately still NOT
-  combined with ticket 13's PIT-universe fix (incomplete without Sharadar; would conflate variables).
-  **Recommendation for the last attempt: spend it on the PIT universe (ticket 13), not another strategy
-  variant** — a strategy clearing the bar on survivorship-biased data still couldn't be trusted, so a
-  clean answer on honest data is decision-grade either way. Operator's call, not decided.
+- [07 — Does the strategy clear the bar?](tickets/07-clears-the-bar.md) — **CLOSED. Budget exhausted
+  after 5 attempts. FAILS, by 0.0009.**
+  attempt 1 flat weights 0.9636 pass / Sharpe 0.564 fail / return-DD 1.536 fail;
+  attempt 2 + vol-managed exposure 0.9615 pass / 0.726 fail / 2.741 pass;
+  attempt 3 + Yang-Zhang range-vol 0.9301 fail / 0.738 fail / 4.182 pass;
+  attempt 4 pure low-vol tilt 0.8870 fail / 0.718 fail / 4.060 pass;
+  **attempt 5 (drop reversal_5d, a specific point raised by an external AI review and verified via a
+  cheap diagnostic before committing) 0.9491 fail / 0.897 PASS / 5.389 pass** — first attempt ever to
+  beat the benchmark's Sharpe, by the widest return/max-DD margin of any attempt, missing DSR's 0.95
+  bar by a rounding error. Per ticket 02's own rule, exhausting the budget closes this as a failure of
+  this specific strategy/universe/window — stated plainly, not softened. Ticket 13's PIT-universe fix
+  was deliberately never combined into any attempt (still incomplete without Sharadar; would have
+  conflated variables). **Left for the operator, not decided here:** accept this result as-is, authorize
+  a fresh attempt budget aimed specifically at the 0.0009 gap, or resolve ticket 13's Sharadar signup
+  first — the one structurally different lever no attempt in this budget touched.
 - [09 — Broker and platform](tickets/09-broker-and-platform.md) — **Interactive Brokers**, connected via
   its own API (TWS/Client Portal), not through TradingView. IBKR turned out to already have a native
   TradingView charting/manual-order panel — the operator's "IBKR or a TradingView broker" framing was a
@@ -95,19 +94,21 @@ the regime where it bets hardest on momentum, suggesting the hand-set priors may
 
 In scope, but not yet sharp enough to ticket. Graduates as the frontier advances.
 
-- **What attempt 2 (of 5) changes.** Ticket 07's attempt 1 failed cleanly: the signal is statistically real
-  (DSR 0.9636) and profitable, but doesn't beat naive buy-and-hold risk-adjusted — a different, more
-  specific problem than "insignificant" or "unprofitable after costs" would have been. Points at the
-  factor set itself as the lever, not costs or regime-weighting (both already ruled out this session).
-  `docs/research/viable-alpha-families.md` has a ranked shortlist (volatility-managed exposure, OHLC
-  range-vol estimators, absolute/time-series momentum with a cash leg, risk-based allocation as benchmark,
-  meta-labelling) not yet read in full or turned into a concrete attempt-2 plan — the next thing to sharpen
-  into a ticket.
+- **What happens now that ticket 07's 5-attempt budget is exhausted (2026-08-20).** The map's destination
+  has technically been reached — a decision on real-capital fitness — and the honest answer for this exact
+  strategy/universe/window is "not yet, missed by 0.0009 on the last attempt." What's genuinely undecided:
+  does the operator authorize a fresh, separate attempt budget aimed at the specific 0.0009 DSR gap
+  (attempt 5's reversal-drop is validated and could be a real starting point, not a blind restart), accept
+  this result and stop here, or resolve ticket 13's Sharadar signup first since delisted-price data is the
+  one structurally different lever no attempt in this budget touched. This is the actual next fog to
+  resolve, not a continuation of the closed ticket.
 - **How paper-trading results get compared against the backtest.** Needs the paper stage to exist first.
   The interesting question is what divergence between paper and backtest would count as disqualifying
   rather than as noise.
-- **Live monitoring once real money is on.** Agent 10 halts on limits, but nothing currently tells a human
-  that it halted. Shape depends on the broker chosen.
+- **Live monitoring once real money is on.** Agent 10 halts on limits and Agent 1 now posts a real Slack
+  alert on every halt (2026-08-20, "monitor by exception") — but only when someone actually runs
+  `python -m core`. Nothing yet triggers that run automatically on a live schedule; shape depends on the
+  broker chosen (ticket 09, now Interactive Brokers) and how positions get monitored between runs.
 - **Whether the backtest window is long enough to conclude anything.** Three years spanning COVID is thin
   for a regime-conditional strategy — it sees each regime only once. Sharpens once ticket 03 establishes
   what data is actually obtainable.

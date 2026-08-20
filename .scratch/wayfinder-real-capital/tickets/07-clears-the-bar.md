@@ -3,8 +3,7 @@
 **Type:** `wayfinder:task`
 **Blocked by:** NOTHING — 02, 05 and 06 are all closed. **This is now the frontier ticket, and the one
 where the map's destination is reached or not.**
-**Status:** OPEN — FAILS the bar (attempt 4 of 5). **1 attempt remains — spend it deliberately.**
-2026-08-20
+**Status:** CLOSED — 5-attempt budget exhausted. Closest: DSR 0.9491 vs 0.95 required (attempt 5), all other conditions passed. 2026-08-20
 
 ## Question
 
@@ -264,3 +263,74 @@ pattern. Two coherent options, both genuinely different in kind:
 **Option 2 is the more informative use of the last attempt** if the Sharadar signup happens, because a
 strategy that clears the bar on biased data still can't be trusted, while a clean answer on real data is
 decision-grade either way. Operator's call — this is deliberately not decided here.
+
+## Attempt 5 (2026-08-20) — FINAL. Missed by 0.0009. Budget exhausted.
+
+Changed direction after a real, checkable diagnostic — not another internal risk-scaling refinement.
+An external AI review (Gemini, queried directly via the project's own OpenAI/Google provider keys —
+see `.scratch/wayfinder-real-capital/project-summary-for-external-review.md` and
+`external-opinion-gemini-2026-08-20.md`) raised a specific, testable claim: the 5-day reversal factor
+decays fast but is held a full month between rebalances, plausibly fighting the slower 12-1 momentum
+factor in the same blend. Most of that review's other claims were either already-known findings restated
+as new, or contained real factual errors (mislabeled which agent is the quantum one; a wrong claim about
+the CIO-memo LLM sitting in the risk-decision critical path) — but this specific mechanism was concrete
+and cheap to check, so it was checked rather than adopted or dismissed on the AI's say-so.
+
+**Diagnosed first** (`.scratch/wayfinder-real-capital/reversal_diagnostic.py`, zero production code
+touched): dropped `reversal_5d`, redistributed its weight evenly across the remaining 3 factors, on top
+of the standing baseline (Yang-Zhang low_volatility + volatility-managed exposure). Result: Sharpe
+0.738 → **0.897** — above the benchmark's 0.849 for the first time in this entire trajectory. Strong
+enough that this became the final formal attempt on its own, deliberately not stacked with the
+absolute-momentum overlay also under consideration for this slot (an unneeded extra parameter if this
+alone was enough).
+
+```
+                          Strategy     Benchmark
+Total return               +186.66%      +322.75%
+Annualized Sharpe             0.897         0.849
+Max drawdown                -16.64%       -39.03%
+Return per unit DD            5.389         2.175
+
+Deflated Sharpe Ratio: 0.9491 (n_trials=5)
+Final account: $2,866.56 (started $1,000)
+```
+
+- **[FAIL]** DSR > 0.95 — **0.9491**. Missed by 0.0009 — the closest result across all five attempts by
+  a wide margin, and the only attempt where this was the SOLE failing condition.
+- **[PASS]** Beats benchmark Sharpe — 0.897 vs 0.849. First and only attempt to pass this.
+- **[PASS]** Beats benchmark return-per-unit-max-drawdown — 5.389 vs 2.175, the best margin across all
+  five attempts.
+- **[PASS]** Profitable — $2,866.56 final, nearly triple the starting account.
+
+**Overall: DOES NOT CLEAR THE BAR. Ticket 02's 5-attempt budget is now exhausted.**
+
+## Ticket resolution — full trajectory
+
+| Attempt | Core change | DSR (n_trials) | Sharpe (strat/bench) | Return/maxDD (strat/bench) | Profitable | Overall |
+|---|---|---|---|---|---|---|
+| 1 | flat regime weights, real IBKR-Lite costs | 0.9636 (1) pass | 0.564/0.849 fail | 1.536/2.175 fail | pass | FAIL |
+| 2 | + volatility-managed exposure | 0.9615 (2) pass | 0.726/0.849 fail | 2.741/2.175 **pass** | pass | FAIL |
+| 3 | + Yang-Zhang range volatility | 0.9301 (3) fail | 0.738/0.849 fail | 4.182/2.175 pass | pass | FAIL |
+| 4 | pure low-vol tilt (naive risk parity) | 0.8870 (4) fail | 0.718/0.849 fail | 4.060/2.175 pass | pass | FAIL |
+| 5 | drop reversal_5d (final) | **0.9491 (5) fail** | **0.897/0.849 pass** | **5.389/2.175 pass** | pass | FAIL |
+
+Per ticket 02's own rule ("exhausting the budget means the approach failed"), this ticket is CLOSED as a
+failure of this specific approach — this exact universe (14 hand-picked large-caps), this exact factor
+family, on this exact 2008-2017 window. Stated plainly, not softened: **the map's destination (a decision
+on whether this system is fit to trade real capital) has been reached, and the answer for this specific
+strategy, as specified, is no.**
+
+What this result does NOT mean: it does not mean the underlying approach is worthless. Attempt 5 came
+within a rounding error of a rigorous, honestly-computed statistical significance bar, while
+simultaneously beating the benchmark on every other measure for the first time. A meaningfully different
+question — whether a 6th attempt (outside this budget, a new decision) with the reversal-drop already
+banked as a validated finding could close the remaining 0.0009 — is a legitimate one to raise with the
+operator, not decided here. So is whether ticket 13's still-incomplete PIT-universe fix (deliberately
+excluded from every attempt in this budget to keep variables isolated) might move DSR by more than 0.0009
+in either direction once real delisted-price data exists.
+
+**Left for the operator to decide, not decided here:** whether to (a) accept this result and treat the
+strategy as not yet fit for real capital, (b) authorize a new attempt budget (a fresh ticket 02-style
+decision, not a silent continuation of this one) focused specifically on closing the 0.0009 gap, or
+(c) revisit ticket 13's Sharadar signup first, since that's the one still-open, structurally different
+lever no attempt in this budget has touched.
