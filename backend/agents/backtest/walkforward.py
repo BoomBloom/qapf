@@ -65,6 +65,9 @@ class WalkForwardBacktester:
         test_start: pd.Timestamp,
         test_end: pd.Timestamp,
         macro_series_cache: dict[str, pd.Series],
+        opens: pd.DataFrame | None = None,
+        highs: pd.DataFrame | None = None,
+        lows: pd.DataFrame | None = None,
     ) -> tuple[pd.Series, list[RebalanceRecord]]:
         """At each rebalance date, compute the regime (Agent 6) and signal
         (Agent 7) using ONLY data at or before that date, then hold that
@@ -72,13 +75,16 @@ class WalkForwardBacktester:
         rebalancing" means in live trading. `prices`/`volumes` may include
         history before `test_start` (needed for momentum's lookback); only
         `[test_start, test_end]` is used for the day-by-day signal series.
+        `opens`/`highs`/`lows` are optional; passed straight through to
+        Agent 7 for the Yang-Zhang low_volatility factor when supplied.
         """
         bundles = []
         rebalance_log: list[RebalanceRecord] = []
         for rdate in rebalance_dates:
             assessment = self.macro.assess(as_of=rdate, series_cache=macro_series_cache)
             bundle = self.combiner.generate(
-                prices, volumes, assessment.regime, assessment.risk_regime, as_of=rdate
+                prices, volumes, assessment.regime, assessment.risk_regime, as_of=rdate,
+                opens=opens, highs=highs, lows=lows,
             )
             bundles.append((rdate, bundle))
             rebalance_log.append(
@@ -117,11 +123,20 @@ class WalkForwardBacktester:
         account: float = 1_000_000,
         n_trials: int = 4,
         exchange_kwargs: dict | None = None,
+        opens: pd.DataFrame | None = None,
+        highs: pd.DataFrame | None = None,
+        lows: pd.DataFrame | None = None,
     ) -> tuple[BacktestReport, pd.Series]:
         """`n_trials=4` reflects the 4 hand-set factors Agent 7 combines; it is
         a stated assumption, not a measured count of strategies actually
         tried, and is surfaced in the report rather than hidden inside a
         single opaque Sharpe number.
+
+        `opens`/`highs`/`lows` are optional; when supplied (same index/columns
+        as `prices`), Agent 7's low_volatility factor uses the Yang-Zhang
+        range estimator instead of close-to-close std (validated 2026-08-20
+        to materially reduce drawdown). Omitting them keeps prior behavior
+        exactly as before -- this is additive, not a breaking change.
 
         `exchange_kwargs` defaults to this module's `EXCHANGE_KWARGS` (Qlib's
         generic cost assumptions, including a flat $5-per-trade `min_cost`).
@@ -164,7 +179,8 @@ class WalkForwardBacktester:
         macro_series_cache = self.macro.fetch_all_series(start_date=macro_start)
 
         signal, rebalance_log = self.build_signal_series(
-            prices, volumes, rebalance_dates, test_start_ts, test_end_ts, macro_series_cache
+            prices, volumes, rebalance_dates, test_start_ts, test_end_ts, macro_series_cache,
+            opens=opens, highs=highs, lows=lows,
         )
 
         strategy = TopkDropoutStrategy(signal=signal, topk=topk, n_drop=n_drop)

@@ -85,8 +85,15 @@ class AlphaCombiner:
         macro_regime: MacroRegime,
         risk_regime: RiskRegime,
         as_of: pd.Timestamp | None = None,
+        opens: pd.DataFrame | None = None,
+        highs: pd.DataFrame | None = None,
+        lows: pd.DataFrame | None = None,
     ) -> SignalBundle:
-        raw = compute_raw_factors(prices, volumes, as_of=as_of)
+        """`opens`/`highs`/`lows` are optional -- when supplied, low_volatility
+        uses the Yang-Zhang range estimator instead of close-to-close std (see
+        factors.compute_raw_factors's docstring); existing callers that don't
+        pass them are unaffected."""
+        raw = compute_raw_factors(prices, volumes, as_of=as_of, opens=opens, highs=highs, lows=lows)
         normalized = pd.DataFrame(
             {col: cross_sectional_normalize(raw[col]) for col in raw.columns},
             index=raw.index,

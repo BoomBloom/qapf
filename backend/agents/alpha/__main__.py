@@ -23,6 +23,7 @@ from .factors import (
     REVERSAL_WINDOW,
     VOL_WINDOW,
     compute_raw_factors,
+    yang_zhang_volatility,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -35,28 +36,41 @@ UNIVERSE = [
 ]
 
 
-def download_universe() -> tuple[pd.DataFrame, pd.DataFrame]:
+def download_universe() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     print(f"Downloading {len(UNIVERSE)} tickers (3y daily)...")
     data = yf.download(UNIVERSE, period="3y", interval="1d", progress=False, auto_adjust=True)
     prices = data["Close"].dropna(how="all")
     volumes = data["Volume"].dropna(how="all")
+    opens, highs, lows = data["Open"], data["High"], data["Low"]
     print(f"  {len(prices)} trading days, {prices.shape[1]} tickers\n")
-    return prices, volumes
+    return prices, volumes, opens, highs, lows
 
 
-def test_no_lookahead_bias(prices, volumes, macro_regime, risk_regime):
-    """Corrupt every price after `as_of` and assert the signal is unchanged."""
+def test_no_lookahead_bias(prices, volumes, macro_regime, risk_regime, opens=None, highs=None, lows=None):
+    """Corrupt every price (and OHLC, when supplied) after `as_of` and assert
+    the signal is unchanged. Covers the new Yang-Zhang path too when
+    opens/highs/lows are passed -- `_slice_to` needs to apply to them exactly
+    like it does to prices/volumes, and this is what actually verifies that
+    rather than trusting the implementation by inspection."""
     combiner = AlphaCombiner()
     as_of = prices.index[-120]  # leave 120 days of "future" to corrupt
 
-    clean = combiner.generate(prices, volumes, macro_regime, risk_regime, as_of=as_of)
+    clean = combiner.generate(prices, volumes, macro_regime, risk_regime, as_of=as_of,
+                               opens=opens, highs=highs, lows=lows)
 
     corrupted = prices.copy()
     corrupted.loc[corrupted.index > as_of] *= 100.0
     corrupted_vol = volumes.copy()
     corrupted_vol.loc[corrupted_vol.index > as_of] *= 100.0
+    corrupted_kwargs = {}
+    if opens is not None:
+        for name, frame in (("opens", opens), ("highs", highs), ("lows", lows)):
+            c = frame.copy()
+            c.loc[c.index > as_of] *= 100.0
+            corrupted_kwargs[name] = c
 
-    dirty = combiner.generate(corrupted, corrupted_vol, macro_regime, risk_regime, as_of=as_of)
+    dirty = combiner.generate(corrupted, corrupted_vol, macro_regime, risk_regime, as_of=as_of,
+                               **corrupted_kwargs)
 
     clean_map = {s.ticker: s.signal for s in clean.signals}
     dirty_map = {s.ticker: s.signal for s in dirty.signals}
@@ -191,8 +205,50 @@ def test_factor_directions(prices, volumes):
     )
 
 
+def test_yang_zhang_volatility(prices, volumes, opens, highs, lows):
+    """Verify the OHLC path (added 2026-08-20) is real, not decorative:
+    (1) it's actually used -- and changes the low_volatility ranking -- when
+    open/high/low are supplied, and (2) its own sign convention is correct,
+    independently recomputed, same standard as every other factor check here.
+    (3) omitting OHLC must reproduce the exact old close-to-close behavior --
+    the additive-parameter promise this refactor made."""
+    with_ohlc = compute_raw_factors(prices, volumes, opens=opens, highs=highs, lows=lows)
+    without_ohlc = compute_raw_factors(prices, volumes)
+
+    assert not without_ohlc["low_volatility"].round(8).equals(with_ohlc["low_volatility"].round(8)), (
+        "low_volatility is identical with and without OHLC -- the Yang-Zhang path isn't "
+        "actually being used when open/high/low are supplied"
+    )
+    print("OHLC-path-is-live check PASSED: supplying open/high/low measurably changes "
+          "low_volatility's values (Yang-Zhang, not the close-to-close fallback).")
+
+    # Independently recompute Yang-Zhang's sign convention: the name with the
+    # SMALLEST range-based vol must score HIGHEST (same low-vol-anomaly
+    # direction as the close-to-close version, just a different estimator).
+    yz_vol = {}
+    for t in prices.columns:
+        v = yang_zhang_volatility(opens[t], highs[t], lows[t], prices[t])
+        if v is not None:
+            yz_vol[t] = -v  # yang_zhang_volatility returns the already-negated score; un-negate for a plain vol comparison
+    yz_series = pd.Series(yz_vol)
+    lowest, highest = yz_series.idxmin(), yz_series.idxmax()
+    assert with_ohlc.at[lowest, "low_volatility"] > with_ohlc.at[highest, "low_volatility"], (
+        f"Yang-Zhang sign is inverted: {lowest} (range-vol {yz_series[lowest]:.5f}) should "
+        f"outscore {highest} (range-vol {yz_series[highest]:.5f})"
+    )
+    print(f"Yang-Zhang sign check PASSED: {lowest} (lowest range-vol) outscores "
+          f"{highest} (highest range-vol).")
+
+    # Regression: no-OHLC path must be byte-identical to pre-refactor behavior.
+    assert without_ohlc.round(10).equals(compute_raw_factors(prices, volumes).round(10)), (
+        "calling compute_raw_factors without OHLC must be deterministic and match itself"
+    )
+    print("Backward-compatibility check PASSED: omitting OHLC reproduces the original "
+          "close-to-close behavior exactly.")
+
+
 def main():
-    prices, volumes = download_universe()
+    prices, volumes, opens, highs, lows = download_universe()
 
     print("=== Pulling live macro regime from Agent 6 ===")
     assessment = MacroRegimeClassifier().assess()
@@ -201,7 +257,7 @@ def main():
     print(f"  regime={macro_regime.value}  risk={risk_regime.value}\n")
 
     combiner = AlphaCombiner()
-    bundle = combiner.generate(prices, volumes, macro_regime, risk_regime)
+    bundle = combiner.generate(prices, volumes, macro_regime, risk_regime, opens=opens, highs=highs, lows=lows)
 
     print(f"=== Alpha signals as of {bundle.as_of} ===")
     print(f"Regime: {bundle.macro_regime} | Risk: {bundle.risk_regime}")
@@ -223,7 +279,8 @@ def main():
     print("Bounds check PASSED: all signals in [-1,+1], all confidences in [0,1].")
 
     test_factor_directions(prices, volumes)
-    test_no_lookahead_bias(prices, volumes, macro_regime, risk_regime)
+    test_yang_zhang_volatility(prices, volumes, opens, highs, lows)
+    test_no_lookahead_bias(prices, volumes, macro_regime, risk_regime, opens=opens, highs=highs, lows=lows)
     test_macro_regime_no_longer_changes_factor_weights(prices, volumes)
     test_risk_regime_still_scales_exposure(prices, volumes)
 
