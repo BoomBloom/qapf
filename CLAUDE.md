@@ -20,15 +20,17 @@ reference/TradingAgents/  Apache-2.0 fork basis — LangGraph orchestration grap
 reference/qlib/           MIT fork basis — data/backtest/execution/optimization engine.
                           Read .claude/references/qlib-known-issues.md BEFORE using its expression engine.
 backend/core/             BUILT & verified live (2026-08-19) — state_graph.py (Agent 1, Lead Orchestrator),
-                          config.py. LangGraph pipeline: macro -> alpha -> portfolio -> risk_gate ->
-                          [execution -> compliance] -> cio_synthesis. Only ONE LLM node (cio_synthesis,
-                          Anthropic claude-sonnet-5) — every other node wraps an already-built
-                          deterministic agent; see state_graph.py's docstring for why 3/4/9/12/14/15 are
-                          deliberately NOT graph nodes. risk_gate is also wayfinder ticket 12's
-                          kill-switch enforcement: a halted state skips execution/compliance entirely
-                          (zero orders constructed, not just zero sent), verified against Agent 9's real
-                          2018-2020 COVID-crash backtest. event_bus.py not built — no consumer yet.
-                          Run: `python -m core`.
+                          config.py, notifier.py. LangGraph pipeline: macro -> alpha -> portfolio ->
+                          risk_gate -> [execution -> compliance] -> cio_synthesis. Only ONE LLM node
+                          (cio_synthesis, Anthropic claude-sonnet-5) — every other node wraps an
+                          already-built deterministic agent; see state_graph.py's docstring for why
+                          3/4/9/12/14/15 are deliberately NOT graph nodes. risk_gate is also wayfinder
+                          ticket 12's kill-switch enforcement: a halted state skips execution/compliance
+                          entirely (zero orders constructed, not just zero sent), verified against
+                          Agent 9's real 2018-2020 COVID-crash backtest. cio_synthesis posts every memo to
+                          Slack (notifier.py, real Incoming Webhook in .env's SLACK_WEBHOOK_URL, fails
+                          soft) — added 2026-08-20, "monitor by exception." event_bus.py not built — no
+                          consumer yet. Run: `python -m core`.
 backend/api/              (not yet built) FastAPI app: main.py, routes/, websockets/
 backend/models/           (not yet built) Pydantic v2 schemas — inter-agent events + API DTOs
 backend/services/         DROPPED (2026-08-18) — Qlib usage lives inside each owning agent's own folder
