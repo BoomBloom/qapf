@@ -8,6 +8,31 @@ Last updated: 2026-08-27
 
 ---
 
+## ▶ Resume here (next session)
+
+Say **`/venture-prime`** first — it loads this file, the research log, and the synthesis.
+
+**Where we got to (2026-08-27):** Phase 1 research is complete. Seven families researched,
+~35 theses examined, 6 survived. Nothing has been built. Nothing should be built yet.
+
+**The next action is one thing:** run the **rank-2 kill test — volatility-scaled momentum**
+(`20-synthesis.md`). It needs almost no new code: QAPF already has the 12-1 momentum factor,
+the walk-forward window, and Deflated Sharpe Ratio. Add inverse-volatility scaling, rerun,
+compare DSR scaled vs unscaled. If DSR doesn't improve materially, the thesis dies and we
+move to rank 1.
+
+Rank 2 goes before rank 1 only because it is cheaper, not because it is stronger. Odd-lot
+tender arbitrage (rank 1) has the better structural story but needs a tender-offer dataset
+built first.
+
+**Two things to verify from a machine with open network** (this cloud session's proxy blocked
+every primary source — see `10-research-log.md` §0):
+1. Whether FINRA's PDT elimination is real (see "Regulatory / structural" below).
+2. The primary sources behind whichever thesis survives its kill test, before it drives
+   any architecture.
+
+---
+
 ## Decided
 
 | # | Decision | Made on | Rationale |
