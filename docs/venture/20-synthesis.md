@@ -2,9 +2,11 @@
 
 Compiled 2026-08-27 from the six research files in `research/`.
 
-> **F7 (foreign exchange) is in flight and NOT reflected below.** It was commissioned after
-> the first six families, at the user's prompting — FX was a genuine gap in the original
-> split. Re-rank the shortlist when it lands rather than appending it to the bottom.
+**Update 2026-08-27:** F7 (foreign exchange) has landed and is folded in below. It was
+commissioned after the first six families, at the user's prompting — FX was a genuine gap in
+the original split. It produced **no promising thesis**, so the ranked shortlist is unchanged;
+what it did produce is the cross-cutting finding in §4 below, which is arguably the most
+useful single output of the whole study.
 
 **Confidence warning:** no primary source was readable from this session (see
 `10-research-log.md` §0). Everything below is `[reported]`. Nothing here is settled — it is a
@@ -22,8 +24,9 @@ prioritized list of what to *test*, ranked by how cheaply it can be falsified.
 | F4 LLM-native | 2 | 3 | 0 |
 | F5 Portfolio construction | 0 | 0 | the whole premise |
 | F6 Small-operator structural | 2 | 4 | 0 |
+| F7 Foreign exchange | 0 | 1 | 4 |
 
-Six promising theses out of roughly thirty examined. That ratio is the honest base rate and
+Six promising theses out of roughly thirty-five examined. That ratio is the honest base rate and
 should be expected to fall further once kill tests run.
 
 ---
@@ -55,6 +58,25 @@ F5's direct answer: sophisticated combinatorial portfolio construction does **no
 out-of-sample Sharpe at this scale, and the case gets *weaker* at $1k–$100k, not stronger.
 The defensible lever is regularization against estimation error, which the existing long-only
 + Ledoit-Wolf allocator already captures. Consistent with QAPF's own verified Agent 5 result.
+
+### 4. Counterparty structure has been a bigger threat than strategy selection
+Three of seven families independently produced the same warning, from unrelated evidence:
+
+- **F7 (FX):** regulator-mandated disclosures show **74–89% of retail CFD accounts lose money**
+  (ESMA 2018 review); individual FCA-regulated broker disclosures range ~46% to ~76%. The
+  proximate cause is the dealing-desk "B-book" model, where the broker is often the client's
+  direct counterparty and profits when the client loses.
+- **F6 (prop firms):** 5–14% challenge pass rates, ~1–2% of challenge buyers ever paid. The
+  business model is selling challenges, not funding traders.
+- **F2 (crypto):** the 2025-10-10 cascade, where correctly-hedged delta-neutral accounts were
+  auto-deleveraged out of their hedges because one venue priced collateral off its own
+  internal order book.
+
+**The transferable rule:** before evaluating any strategy, ask *who is on the other side, and
+do they profit when I lose?* Central clearing (CME futures, listed equities) removes this
+question. Dealing-desk brokers, prop-firm challenges, and single-venue crypto margin do not.
+On this evidence, venue structure deserves a hard filter *before* strategy selection — not a
+footnote after it.
 
 ---
 
@@ -118,6 +140,29 @@ venues restrict US persons). Revisit at ≥$10k capital.
 
 ---
 
+## Foreign exchange — closed, with one useful residue
+
+F7 found no thesis worth testing at this account size:
+- **Carry** — dead here. The one real documented FX risk premium, but it is compensation for
+  rare fast crashes: 2008 drawdowns reported -7% to -32%; the 2015 CHF de-peg moved ~30% in a
+  single session and bankrupted brokers; the Aug 2024 yen unwind produced the worst Nikkei day
+  since 1987. Disqualifying negative skew at $1,000.
+- **Trend/momentum** — marginal-to-dead. Reported Sharpe ~1.9 in the 2000s decaying to ~0.2
+  since, so it no longer reliably offsets carry's tail as the classic pairing assumed.
+- **PPP mean-reversion** — real (2.5-5yr half-life, well triangulated) but structurally
+  unusable at that horizon for an operator trying to compound capital.
+- **Central-bank divergence** — discretionary macro narrative; no formalized backtestable rule
+  was found.
+
+**The residue worth keeping:** FX's only genuine structural advantage over equities was
+exemption from the PDT rule — and that advantage is available via **CME Micro FX futures**,
+which are centrally cleared and therefore avoid the B-book conflict entirely. If the PDT
+elimination above holds, the advantage disappears on both sides. FX's real draw for a small
+account is high leverage plus near-zero minimums, which is precisely the combination that
+destroys small accounts fastest.
+
+---
+
 ## Declared dead — do not revisit without new evidence
 
 - Everything in options/volatility at this account size. Every thesis is either a sold risk
@@ -129,6 +174,8 @@ venues restrict US persons). Revisit at ≥$10k capital.
 - Crypto basis at $1k (CME Micro BTC margin ~$2,800), solo MEV, cross-exchange latency arb.
 - Naive standalone size effect; unconditional low-volatility (crowded, trades expensive).
 - Quantum and quantum-inspired combinatorial optimization as a source of edge.
+- **All of foreign exchange at this account size** — carry, trend, PPP, policy divergence.
+  Retail FX through a dealing-desk broker is disqualified on venue structure alone.
 - **Prop-firm funded accounts as a capital strategy.** Reported 5–14% challenge pass rates,
   ~1–2% of challenge buyers ever paid. Legitimate only as leverage for someone already
   independently profitable — never as a route to becoming profitable.

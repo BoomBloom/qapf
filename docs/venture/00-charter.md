@@ -19,6 +19,8 @@ Last updated: 2026-08-27
 | D5 | **Options/volatility is closed** at this account size. | 2026-08-27 | F3: every thesis is a sold risk premium with an account-ending tail, or a retail structural loser after costs. Negative skew is disqualifying at $1,000. |
 | D6 | **Crypto is shelved, not dead** — revisit at >=$10k capital. | 2026-08-27 | F2: funding carry is the one real edge but needs ~$5-10k per position, and deepest venues restrict US persons. |
 | D7 | **Prop-firm funded accounts are not a capital strategy.** | 2026-08-27 | F6: reported 5-14% pass rates, ~1-2% of buyers ever paid. Only defensible as leverage for someone already independently profitable. |
+| D8 | **Foreign exchange is closed** at this account size. | 2026-08-27 | F7: carry has disqualifying negative skew, trend decayed (~1.9 to ~0.2 Sharpe), PPP horizon unusable, policy divergence not formalizable. Retail FX also fails the venue-structure filter (D9). |
+| D9 | **Venue structure is a hard filter applied BEFORE strategy selection.** Ask who is on the other side and whether they profit when we lose. Prefer centrally-cleared venues. | 2026-08-27 | Three of seven families independently produced this warning: FX B-book (ESMA: 74-89% of retail CFD accounts lose money), prop-firm challenge economics, and the 2025-10-10 crypto ADL cascade that broke correct hedges. |
 
 ## Open — blocking
 
@@ -26,7 +28,7 @@ Last updated: 2026-08-27
 |---|----------|---------------|--------|
 | O1 | What does "quantum" mean here: quantum-inspired classical, literal QPU, plain quant, or hybrid? | Determines the entire technical identity and which research questions are even worth asking. | **Provisionally answered: drop it.** F5 found combinatorial construction adds no out-of-sample Sharpe at this scale, and the case weakens at $1k-$100k. Confirm with F5's five kill tests before moving this to Decided. |
 | O2 | New repo, evolve QAPF, or harvest QAPF's proven parts? | Determines what we inherit and what we rebuild. | Deferred — answerable only once O1 and the edge thesis are settled. Do not guess. |
-| O3 | Which market and horizon? | Data cost, feedback-loop speed, and where an edge is even plausible. | Narrowing. Options closed (D5), crypto shelved (D6). US equities plus event-driven/structural niches lead. **Forex research (F7) in flight as of 2026-08-27** — added at user's request after the first six families. |
+| O3 | Which market and horizon? | Data cost, feedback-loop speed, and where an edge is even plausible. | **Effectively answered: US-listed equities plus event-driven/structural niches.** Options closed (D5), crypto shelved (D6), FX closed (D8). Move to Decided once the rank-1 and rank-2 kill tests confirm something survives there. |
 
 ## Open — non-blocking
 
