@@ -16,14 +16,17 @@ Last updated: 2026-08-27
 | D2 | Long-term intent is **income from trading**. See "The capital constraint" below — this reframes the near-term goal without abandoning the long-term one. | 2026-08-27 | User's stated objective. |
 | D3 | **Deep research precedes any code.** No architecture, no repo layout, no agents until a falsifiable edge hypothesis exists with evidence behind it. | 2026-08-27 | User's explicit instruction, and the failure mode QAPF already demonstrates (16 working agents, no proven edge). |
 | D4 | Session context is maintained in **markdown in-repo**, not in conversation history. | 2026-08-27 | Cost discipline — see `.claude/skills/venture-prime/SKILL.md`. |
+| D5 | **Options/volatility is closed** at this account size. | 2026-08-27 | F3: every thesis is a sold risk premium with an account-ending tail, or a retail structural loser after costs. Negative skew is disqualifying at $1,000. |
+| D6 | **Crypto is shelved, not dead** — revisit at >=$10k capital. | 2026-08-27 | F2: funding carry is the one real edge but needs ~$5-10k per position, and deepest venues restrict US persons. |
+| D7 | **Prop-firm funded accounts are not a capital strategy.** | 2026-08-27 | F6: reported 5-14% pass rates, ~1-2% of buyers ever paid. Only defensible as leverage for someone already independently profitable. |
 
 ## Open — blocking
 
 | # | Question | Why it blocks | Status |
 |---|----------|---------------|--------|
-| O1 | What does "quantum" mean here: quantum-inspired classical, literal QPU, plain quant, or hybrid? | Determines the entire technical identity and which research questions are even worth asking. | Awaiting user, briefed 2026-08-27 (see `10-research-log.md` §1) |
+| O1 | What does "quantum" mean here: quantum-inspired classical, literal QPU, plain quant, or hybrid? | Determines the entire technical identity and which research questions are even worth asking. | **Provisionally answered: drop it.** F5 found combinatorial construction adds no out-of-sample Sharpe at this scale, and the case weakens at $1k-$100k. Confirm with F5's five kill tests before moving this to Decided. |
 | O2 | New repo, evolve QAPF, or harvest QAPF's proven parts? | Determines what we inherit and what we rebuild. | Deferred — answerable only once O1 and the edge thesis are settled. Do not guess. |
-| O3 | Which market and horizon? | Data cost, feedback-loop speed, and where an edge is even plausible. | Deferred to the research phase, by user's choice. |
+| O3 | Which market and horizon? | Data cost, feedback-loop speed, and where an edge is even plausible. | Narrowing. Options closed (D5), crypto shelved (D6). US equities plus event-driven/structural niches lead. **Forex research (F7) in flight as of 2026-08-27** — added at user's request after the first six families. |
 
 ## Open — non-blocking
 
@@ -60,8 +63,14 @@ a rejection of it.
 
 ### Regulatory / structural
 
-- US pattern-day-trader rule: sub-$25k accounts are capped at 3 day trades per 5 business
-  days in a margin account. Constrains intraday equity strategies at current size.
+- ~~US pattern-day-trader rule: sub-$25k accounts are capped at 3 day trades per 5 business
+  days.~~ **LIKELY OBSOLETE — VERIFY.** F3 and F6 independently reported that the SEC approved
+  FINRA's elimination of the PDT framework and the $25,000 minimum (approved 2026-04-14,
+  effective 2026-06-04; broker rollout to Oct 2027), replaced by real-time intraday margin.
+  Status `[reported]`, not verified — both agents used the same search tool with `sec.gov` and
+  FINRA blocked, so this is correlated evidence, not independent confirmation. **Re-check from
+  a machine with open network before relying on it.** If true, it materially widens what is
+  viable at small account size.
 - QAPF's Agent 2 is long-only because Qlib's optimizer hard-codes no-shorting and
   margin/borrow are unmodeled. Any short-side thesis needs new machinery.
 
