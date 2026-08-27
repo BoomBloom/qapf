@@ -8,6 +8,36 @@ source, plausible) · **unverified** (claim encountered, not checked)
 
 ---
 
+## §0 — 2026-08-27 · ENVIRONMENT CONSTRAINT (read this before trusting any confidence tag)
+
+This cloud session's egress proxy denies CONNECT to essentially every primary research
+source with a **403 policy denial** — not a network error, an organizational allow-list.
+Confirmed at the proxy status endpoint, not merely inferred from failed fetches.
+
+Blocked and confirmed: `ssrn.com`, `semanticscholar.org`, `researchgate.net`,
+`academic.oup.com`, `arxiv.org`, `mdpi.com`, `www.sec.gov`, `www.federalreserve.gov`,
+`www.nasdaq.com`, `www.spglobal.com`, `www.morningstar.com`, `quantpedia.com`,
+`jacobslevycenter.wharton.upenn.edu`, `www.bogleheads.org`, plus the market-data APIs
+`api.binance.com`, `fapi.binance.com`, `api.kraken.com`, `api.coingecko.com`,
+`api.hyperliquid.xyz`, `www.alphavantage.co`.
+
+Reachable: WebSearch (result summaries), github.com, pypi.org, npm.
+
+### What this means
+1. **Every Phase 1 finding is `[reported]` at best.** No primary paper was read; no live
+   funding rate, fee schedule, or filing was fetched. Treat the research files as a
+   well-sourced *hypothesis generator*, not as verified fact.
+2. **Before any thesis drives architecture, its primary sources must be re-verified from a
+   machine with open network access** (i.e. the local Claude Code session, not this one).
+3. **The kill tests are unaffected.** Falsification runs on price data held locally — it
+   never needed the web. This is the strongest argument for killing theses empirically
+   rather than adjudicating them from literature.
+
+Per the proxy README, policy denials must be reported rather than routed around. No attempt
+was made to circumvent them.
+
+---
+
 ## §1 — 2026-08-27 · Is there open-source quantum computing for trading, and does it work?
 
 **Question:** Does open-source quantum software for trading exist, and does quantum hardware
