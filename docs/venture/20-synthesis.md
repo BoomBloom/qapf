@@ -25,6 +25,7 @@ prioritized list of what to *test*, ranked by how cheaply it can be falsified.
 | F5 Portfolio construction | 0 | 0 | the whole premise |
 | F6 Small-operator structural | 2 | 4 | 0 |
 | F7 Foreign exchange | 0 | 1 | 4 |
+| F8 Order flow / microstructure | 0 | 2 | 3 |
 
 Six promising theses out of roughly thirty-five examined. That ratio is the honest base rate and
 should be expected to fall further once kill tests run.
@@ -163,6 +164,53 @@ destroys small accounts fastest.
 
 ---
 
+## Order flow — closed except one slower-horizon thesis (F8, 2026-09-03)
+
+Commissioned at the user's prompting; the original seven families had no
+order-flow coverage. **Direct answer: no, a retail operator cannot systematically
+extract an order-flow edge** — with one narrow exception.
+
+- **Order book imbalance (OBI)** — the most-studied signal, and unreachable.
+  Predictive power is concentrated in the next 1-2 order-book events and decays
+  to near-zero within seconds to tens of seconds (Cont-Kukanov-Stoikov 2014).
+  Colocated HFT runs 100-500ns tick-to-trade; a retail round trip is 10-100ms,
+  ~1ms on a dedicated trading VPS. That is not "somewhat slower" — it is a
+  different physics regime, and the retail operator is trading a stale signal.
+  [reported]
+- **Trade-sign long memory / metaorder persistence** (Lillo-Mike-Farmer,
+  Bouchaud) — **the one exception.** Driven by institutional order-splitting, so
+  it lives on a structural timescale of minutes to hours and is NOT latency-gated.
+  Unproven net of costs: the same order-splitting that creates the persistence
+  also creates the impact costs that would eat any edge from anticipating it.
+  Worth a real kill test. [reported]
+- **VPIN** — marginal-to-dead; disputed by Andersen & Bondarenko, who find no
+  incremental predictive power once volume and volatility are controlled for.
+- **Iceberg detection** — real academic literature, but no evidence of profitable
+  trading rules built on it. Better used as an execution-quality overlay than as
+  alpha.
+- **CVD / footprint charts / delta divergence** — the popular retail canon.
+  Targeted searches returned **zero peer-reviewed evidence**; only vendor blogs
+  and course material. Same education-industry conflict pattern as retail FX
+  (see §4) — the people teaching it profit from volume or from selling courses.
+
+**Cheapest kill test, and it costs nothing:** crypto exchanges give away
+full-depth L2 order books, unlike CME MBO via Databento (~$179-199/month). Pull
+free Binance/Coinbase L2, compute OBI, regress forward returns across horizons
+from 100ms to 5min, and plot the decay curve. Expect collapse by 30-60 seconds.
+Crypto is shelved for *trading* (D6) but is the cheapest venue on earth for this
+*research*.
+
+**If anything survives:** CME Micro E-minis (MES/MNQ, ~$50-300 intraday margin)
+are the correct live venue — centrally cleared, so they pass the D9 venue filter.
+**But the existing Qlib/OHLCV harness cannot evaluate any order-flow thesis** —
+order-book reconstruction and queue-position modelling are missing data
+structures, not a resolution setting. That needs `nautilus_trader` or
+`hftbacktest` (both open-source, both with genuine queue modelling). Lean cannot
+do it natively. Note: `nautilus_trader` is one of the nine stale untouched forks
+in the fork audit — if this thesis survives, it becomes the first fork with a job.
+
+---
+
 ## Declared dead — do not revisit without new evidence
 
 - Everything in options/volatility at this account size. Every thesis is either a sold risk
@@ -176,6 +224,9 @@ destroys small accounts fastest.
 - Quantum and quantum-inspired combinatorial optimization as a source of edge.
 - **All of foreign exchange at this account size** — carry, trend, PPP, policy divergence.
   Retail FX through a dealing-desk broker is disqualified on venue structure alone.
+- **Order book imbalance and the retail order-flow canon** (CVD, footprint,
+  delta divergence) — OBI is real but decays inside the retail latency floor;
+  the canon has no peer-reviewed support at all.
 - **Prop-firm funded accounts as a capital strategy.** Reported 5–14% challenge pass rates,
   ~1–2% of challenge buyers ever paid. Legitimate only as leverage for someone already
   independently profitable — never as a route to becoming profitable.

@@ -15,11 +15,19 @@ Say **`/venture-prime`** first — it loads this file, the research log, and the
 **Where we got to (2026-08-27):** Phase 1 research is complete. Seven families researched,
 ~35 theses examined, 6 survived. Nothing has been built. Nothing should be built yet.
 
-**The next action is one thing:** run the **rank-2 kill test — volatility-scaled momentum**
-(`20-synthesis.md`). It needs almost no new code: QAPF already has the 12-1 momentum factor,
-the walk-forward window, and Deflated Sharpe Ratio. Add inverse-volatility scaling, rerun,
-compare DSR scaled vs unscaled. If DSR doesn't improve materially, the thesis dies and we
-move to rank 1.
+**The next action is one thing, and it is now written and ready to run:**
+
+```
+source .venv/bin/activate
+python docs/venture/killtests/kt2_vol_scaled_momentum.py
+```
+
+`docs/venture/killtests/kt2_vol_scaled_momentum.py` is the rank-2 kill test
+(volatility-scaled momentum). Its pure-math layer is verified on synthetic data; the
+backtest arm could not be run in the cloud session that wrote it (no Python 3.12 venv,
+no `reference/qlib`, no bundled dataset), so **its first real run is on your machine**.
+It has a pass criterion fixed before the run, a look-ahead test, an identity check, and
+common-sample alignment across arms. Do not edit the criterion after seeing results.
 
 Rank 2 goes before rank 1 only because it is cheaper, not because it is stronger. Odd-lot
 tender arbitrage (rank 1) has the better structural story but needs a tender-offer dataset
@@ -46,6 +54,8 @@ every primary source — see `10-research-log.md` §0):
 | D7 | **Prop-firm funded accounts are not a capital strategy.** | 2026-08-27 | F6: reported 5-14% pass rates, ~1-2% of buyers ever paid. Only defensible as leverage for someone already independently profitable. |
 | D8 | **Foreign exchange is closed** at this account size. | 2026-08-27 | F7: carry has disqualifying negative skew, trend decayed (~1.9 to ~0.2 Sharpe), PPP horizon unusable, policy divergence not formalizable. Retail FX also fails the venue-structure filter (D9). |
 | D9 | **Venue structure is a hard filter applied BEFORE strategy selection.** Ask who is on the other side and whether they profit when we lose. Prefer centrally-cleared venues. | 2026-08-27 | Three of seven families independently produced this warning: FX B-book (ESMA: 74-89% of retail CFD accounts lose money), prop-firm challenge economics, and the 2025-10-10 crypto ADL cascade that broke correct hedges. |
+
+| D10 | **Order flow is closed except one thesis.** OBI and the retail order-flow canon are out; trade-sign/metaorder persistence (minutes-to-hours) survives as testable. | 2026-09-03 | F8: OBI decays within seconds; retail round trip is 10-100ms against colocated HFT at 100-500ns. CVD/footprint/delta-divergence returned zero peer-reviewed evidence. |
 
 ## Open — blocking
 
