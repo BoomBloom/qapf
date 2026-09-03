@@ -1,0 +1,123 @@
+# Venture Charter — the next project
+
+**Status:** thesis undecided. This file is the single source of truth for what has been
+DECIDED vs. what is still OPEN. Update it when a decision is made; never restate open
+questions as if they were settled.
+
+Last updated: 2026-08-27
+
+---
+
+## ▶ Resume here (next session)
+
+Say **`/venture-prime`** first — it loads this file, the research log, and the synthesis.
+
+**Where we got to (2026-08-27):** Phase 1 research is complete. Seven families researched,
+~35 theses examined, 6 survived. Nothing has been built. Nothing should be built yet.
+
+**The next action is one thing, and it is now written and ready to run:**
+
+```
+source .venv/bin/activate
+python docs/venture/killtests/kt2_vol_scaled_momentum.py
+```
+
+`docs/venture/killtests/kt2_vol_scaled_momentum.py` is the rank-2 kill test
+(volatility-scaled momentum). Its pure-math layer is verified on synthetic data; the
+backtest arm could not be run in the cloud session that wrote it (no Python 3.12 venv,
+no `reference/qlib`, no bundled dataset), so **its first real run is on your machine**.
+It has a pass criterion fixed before the run, a look-ahead test, an identity check, and
+common-sample alignment across arms. Do not edit the criterion after seeing results.
+
+Rank 2 goes before rank 1 only because it is cheaper, not because it is stronger. Odd-lot
+tender arbitrage (rank 1) has the better structural story but needs a tender-offer dataset
+built first.
+
+**Two things to verify from a machine with open network** (this cloud session's proxy blocked
+every primary source — see `10-research-log.md` §0):
+1. Whether FINRA's PDT elimination is real (see "Regulatory / structural" below).
+2. The primary sources behind whichever thesis survives its kill test, before it drives
+   any architecture.
+
+---
+
+## Decided
+
+| # | Decision | Made on | Rationale |
+|---|----------|---------|-----------|
+| D1 | Primary goal is **a real, verifiable edge** — a strategy that survives adversarial out-of-sample testing and could trade real money. | 2026-08-27 | User's stated objective. Portfolio-piece and research value are welcome side effects, not the target. |
+| D2 | Long-term intent is **income from trading**. See "The capital constraint" below — this reframes the near-term goal without abandoning the long-term one. | 2026-08-27 | User's stated objective. |
+| D3 | **Deep research precedes any code.** No architecture, no repo layout, no agents until a falsifiable edge hypothesis exists with evidence behind it. | 2026-08-27 | User's explicit instruction, and the failure mode QAPF already demonstrates (16 working agents, no proven edge). |
+| D4 | Session context is maintained in **markdown in-repo**, not in conversation history. | 2026-08-27 | Cost discipline — see `.claude/skills/venture-prime/SKILL.md`. |
+| D5 | **Options/volatility is closed** at this account size. | 2026-08-27 | F3: every thesis is a sold risk premium with an account-ending tail, or a retail structural loser after costs. Negative skew is disqualifying at $1,000. |
+| D6 | **Crypto is shelved, not dead** — revisit at >=$10k capital. | 2026-08-27 | F2: funding carry is the one real edge but needs ~$5-10k per position, and deepest venues restrict US persons. |
+| D7 | **Prop-firm funded accounts are not a capital strategy.** | 2026-08-27 | F6: reported 5-14% pass rates, ~1-2% of buyers ever paid. Only defensible as leverage for someone already independently profitable. |
+| D8 | **Foreign exchange is closed** at this account size. | 2026-08-27 | F7: carry has disqualifying negative skew, trend decayed (~1.9 to ~0.2 Sharpe), PPP horizon unusable, policy divergence not formalizable. Retail FX also fails the venue-structure filter (D9). |
+| D9 | **Venue structure is a hard filter applied BEFORE strategy selection.** Ask who is on the other side and whether they profit when we lose. Prefer centrally-cleared venues. | 2026-08-27 | Three of seven families independently produced this warning: FX B-book (ESMA: 74-89% of retail CFD accounts lose money), prop-firm challenge economics, and the 2025-10-10 crypto ADL cascade that broke correct hedges. |
+
+| D10 | **Order flow is closed except one thesis.** OBI and the retail order-flow canon are out; trade-sign/metaorder persistence (minutes-to-hours) survives as testable. | 2026-09-03 | F8: OBI decays within seconds; retail round trip is 10-100ms against colocated HFT at 100-500ns. CVD/footprint/delta-divergence returned zero peer-reviewed evidence. |
+
+## Open — blocking
+
+| # | Question | Why it blocks | Status |
+|---|----------|---------------|--------|
+| O1 | What does "quantum" mean here: quantum-inspired classical, literal QPU, plain quant, or hybrid? | Determines the entire technical identity and which research questions are even worth asking. | **Provisionally answered: drop it.** F5 found combinatorial construction adds no out-of-sample Sharpe at this scale, and the case weakens at $1k-$100k. Confirm with F5's five kill tests before moving this to Decided. |
+| O2 | New repo, evolve QAPF, or harvest QAPF's proven parts? | Determines what we inherit and what we rebuild. | Deferred — answerable only once O1 and the edge thesis are settled. Do not guess. |
+| O3 | Which market and horizon? | Data cost, feedback-loop speed, and where an edge is even plausible. | **Effectively answered: US-listed equities plus event-driven/structural niches.** Options closed (D5), crypto shelved (D6), FX closed (D8). Move to Decided once the rank-1 and rank-2 kill tests confirm something survives there. |
+
+## Open — non-blocking
+
+- O4: Project name. Placeholder is "venture"; rename the skill and docs when a name exists.
+- O5: Whether QAPF's `reference/` forks should be pushed to GitHub as real backups (currently they are untouched mirrors — see the fork audit).
+
+---
+
+## Hard constraints (facts, not preferences)
+
+### The capital constraint
+
+QAPF's own Agent 16 established the live account is **$1,000** and found cash yield at that
+size is genuinely $0. That number sets the near-term ceiling and must not be wished away:
+
+| Capital | 25%/yr (excellent, sustained) | 50%/yr (exceptional, rarely sustained) |
+|---------|------------------------------|----------------------------------------|
+| $1,000 | $250/yr | $500/yr |
+| $25,000 | $6,250/yr | $12,500/yr |
+| $150,000 | $37,500/yr | $75,000/yr |
+
+Living-wage income from trading requires roughly $150k–$250k of capital at defensible return
+rates. The gap between $1,000 and that is **capital, not strategy** — no algorithm closes it.
+
+**Consequence for this project:** the near-term deliverable is a *verified edge with an
+auditable track record*, because that is the prerequisite for every route to income:
+1. Compounding own capital (slow; requires outside income meanwhile)
+2. Managing others' capital (requires track record + regulatory registration)
+3. Selling the skill or the technology (quant role, or a product)
+
+Optimizing for "income this year" from $1,000 produces overleveraged, blown-up accounts.
+Optimizing for "provable edge" keeps all three routes open. This is a reframing of D2, not
+a rejection of it.
+
+### Regulatory / structural
+
+- ~~US pattern-day-trader rule: sub-$25k accounts are capped at 3 day trades per 5 business
+  days.~~ **LIKELY OBSOLETE — VERIFY.** F3 and F6 independently reported that the SEC approved
+  FINRA's elimination of the PDT framework and the $25,000 minimum (approved 2026-04-14,
+  effective 2026-06-04; broker rollout to Oct 2027), replaced by real-time intraday margin.
+  Status `[reported]`, not verified — both agents used the same search tool with `sec.gov` and
+  FINRA blocked, so this is correlated evidence, not independent confirmation. **Re-check from
+  a machine with open network before relying on it.** If true, it materially widens what is
+  viable at small account size.
+- QAPF's Agent 2 is long-only because Qlib's optimizer hard-codes no-shorting and
+  margin/borrow are unmodeled. Any short-side thesis needs new machinery.
+
+---
+
+## Anti-goals
+
+- Building agents, dashboards, or orchestration before an edge is proven. QAPF already
+  demonstrates that a complete, working system and a profitable one are different things.
+- Adopting "quantum" as branding without a benchmark that proves it beats the classical
+  baseline on the same problem.
+- Any backtest result accepted without a Deflated Sharpe Ratio and an out-of-sample split
+  chosen *before* the strategy was fitted.
